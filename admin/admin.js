@@ -5,28 +5,36 @@ import AdminJSSequelize from "@adminjs/sequelize";
 import sequelize from "../config/database.js";
 
 // Models
-import User from "../model/user.js";
-// import Product from "../models/product.js";
-// import Category from "../models/category.js";
-// import Order from "../models/order.js";
-// import OrderItem from "../models/orderItem.js";
-// import Setting from "../models/setting.js";
+import {
+  User,
+  Category,
+  Product,
+  Order,
+  OrderItem,
+  Setting,
+} from "../model/index.js";
 
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
 const admin = new AdminJS({
-  resources: [
-    { resource: User, options: { navigation: "User Management" } },
-    // { resource: Product, options: { navigation: "Store" } },
-    // { resource: Category, options: { navigation: "Store" } },
-    // { resource: Order, options: { navigation: "Sales" } },
-    // { resource: OrderItem, options: { navigation: "Sales" } },
-    // { resource: Setting, options: { navigation: "Configuration" } },
-  ],
+  databases: [sequelize],
   rootPath: "/admin",
+
+  resources: [User, Category, Product, Order, OrderItem, Setting],
 });
 
-const router = AdminJSExpress.buildRouter(admin);
+const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
+  authenticate: async (email, password) => {
+    const user = await User.findOne({ where: { email } });
+
+    if (user && user.role === "admin") {
+      return user;
+    }
+    return null;
+  },
+  cookieName: "adminjs",
+  cookiePassword: "secretcookie",
+});
 
 export default router;
