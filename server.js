@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import orderItemRoutes from "./routes/orderItemRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import "./model/index.js";
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
+app.use("/api/uploads", uploadRoutes);
 sequelize.sync({ alter: true }).then(() => {
   app.listen(5000, () => {
     console.log("Server running on http://localhost:5000");

@@ -2,6 +2,59 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 import cloudinary from "../config/cloudinary.js";
 
+const extractPublicIdFromUrl = (imageUrl) => {
+  if (!imageUrl || typeof imageUrl !== "string") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(imageUrl);
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    const uploadIndex = parts.findIndex((segment) => segment === "upload");
+
+    if (uploadIndex === -1) {
+      return null;
+    }
+
+    let cloudinaryPath = parts.slice(uploadIndex + 1);
+
+    // Drop transformation/version prefixes if present.
+    while (cloudinaryPath.length > 0) {
+      const head = cloudinaryPath[0];
+      if (/^v\d+$/.test(head)) {
+        cloudinaryPath.shift();
+        break;
+      }
+
+      if (head.includes(",") || head.includes("_")) {
+        cloudinaryPath.shift();
+        continue;
+      }
+
+      break;
+    }
+
+    if (cloudinaryPath.length === 0) {
+      return null;
+    }
+
+    const last = cloudinaryPath[cloudinaryPath.length - 1];
+    cloudinaryPath[cloudinaryPath.length - 1] = last.replace(/\.[^.]+$/, "");
+
+    return decodeURIComponent(cloudinaryPath.join("/"));
+  } catch {
+    return null;
+  }
+};
+
+const resolvePublicId = (productLike) => {
+  return (
+    productLike?.imagePublicId ||
+    extractPublicIdFromUrl(productLike?.imageUrl) ||
+    null
+  );
+};
+
 const deleteFromCloudinary = async (publicId) => {
   if (!publicId) {
     return;
@@ -65,26 +118,41 @@ const Product = sequelize.define(
 );
 
 Product.beforeUpdate(async (product) => {
-  const oldPublicId = product.previous("imagePublicId");
-  const newPublicId = product.get("imagePublicId");
-  const newImageUrl = product.get("imageUrl");
+  const oldPublicId =
+    product.previous("imagePublicId") ||
+    extractPublicIdFromUrl(product.previous("imageUrl"));
+  const newPublicId =
+    product.get("imagePublicId") ||
+    extractPublicIdFromUrl(product.get("imageUrl"));
 
-  const imageRemoved = oldPublicId && !newImageUrl;
-  const imageReplaced =
-    oldPublicId && newPublicId && oldPublicId !== newPublicId;
-  const publicIdCleared = oldPublicId && !newPublicId;
-
-  if (imageRemoved || imageReplaced || publicIdCleared) {
+  if (oldPublicId && oldPublicId !== newPublicId) {
     await deleteFromCloudinary(oldPublicId);
   }
 
-  if (imageRemoved && !newPublicId) {
+  if (!product.get("imageUrl")) {
     product.set("imagePublicId", null);
   }
 });
 
 Product.beforeDestroy(async (product) => {
-  await deleteFromCloudinary(product.imagePublicId);
+  await deleteFromCloudinary(resolvePublicId(product));
+});
+
+Product.beforeBulkDestroy(async (options) => {
+  if (!options?.where) {
+    return;
+  }
+
+  const products = await Product.findAll({
+    where: options.where,
+    attributes: ["id", "imageUrl", "imagePublicId"],
+  });
+
+  await Promise.all(
+    products.map(async (product) => {
+      await deleteFromCloudinary(resolvePublicId(product));
+    }),
+  );
 });
 
 export default Product;

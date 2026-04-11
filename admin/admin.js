@@ -1,6 +1,9 @@
-import AdminJS from "adminjs";
+import AdminJS, { ComponentLoader } from "adminjs";
 import AdminJSExpress from "@adminjs/express";
 import AdminJSSequelize from "@adminjs/sequelize";
+import { Op } from "sequelize";
+import { fileURLToPath } from "url";
+import path from "path";
 
 import sequelize from "../config/database.js";
 
@@ -17,12 +20,163 @@ import {
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
-const admin = new AdminJS({
-  databases: [sequelize],
-  rootPath: "/admin",
+const componentLoader = new ComponentLoader();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const Components = {
+  Dashboard: componentLoader.add(
+    "Dashboard",
+    path.join(__dirname, "dashboard.jsx"),
+  ),
+  ProductImage: componentLoader.add(
+    "ProductImage",
+    path.join(__dirname, "product-image.jsx"),
+  ),
+  ProductImageUpload: componentLoader.add(
+    "ProductImageUpload",
+    path.join(__dirname, "product-image-upload.jsx"),
+  ),
+};
 
-  resources: [User, Category, Product, Order, OrderItem, Setting],
+const productResource = {
+  resource: Product,
+  options: {
+    listProperties: [
+      "name",
+      "categoryId",
+      "imageUrl",
+      "stock",
+      "price",
+      "isActive",
+    ],
+    showProperties: [
+      "id",
+      "name",
+      "sku",
+      "categoryId",
+      "isActive",
+      "imageUrl",
+      "stock",
+      "price",
+      "description",
+      "createdAt",
+      "updatedAt",
+    ],
+    editProperties: [
+      "name",
+      "sku",
+      "categoryId",
+      "isActive",
+      "uploadImage",
+      "imagePublicId",
+      "stock",
+      "price",
+      "description",
+    ],
+    filterProperties: ["name", "categoryId", "isActive", "stock", "price"],
+    properties: {
+      uploadImage: {
+        type: "string",
+        isVisible: {
+          list: false,
+          filter: false,
+          show: false,
+          edit: true,
+        },
+        label: "Upload Image",
+        components: {
+          edit: Components.ProductImageUpload,
+        },
+      },
+      imageUrl: {
+        description:
+          "Upload an image file and save only the Cloudinary URL in PostgreSQL",
+        isVisible: {
+          list: true,
+          filter: false,
+          show: true,
+          edit: false,
+        },
+        components: {
+          list: Components.ProductImage,
+          show: Components.ProductImage,
+        },
+      },
+      imagePublicId: {
+        isVisible: {
+          list: false,
+          filter: false,
+          show: false,
+          edit: false,
+        },
+      },
+    },
+  },
+};
+
+const admin = new AdminJS({
+  rootPath: "/admin",
+  componentLoader,
+  dashboard: {
+    component: Components.Dashboard,
+    handler: async () => {
+      const [users, categories, products, orders, featuredGems, criticalStock] =
+        await Promise.all([
+          User.count(),
+          Category.count(),
+          Product.count(),
+          Order.count(),
+          Product.count({ where: { isActive: true } }),
+          Product.count({ where: { stock: { [Op.lte]: 5 } } }),
+        ]);
+
+      const totalRevenueRaw = await Order.sum("totalAmount");
+
+      const recentProducts = await Product.findAll({
+        attributes: ["id", "name", "price", "createdAt"],
+        order: [["createdAt", "DESC"]],
+        limit: 4,
+      });
+
+      const allCategories = await Category.findAll({
+        attributes: ["id", "name"],
+        order: [["name", "ASC"]],
+      });
+
+      const categoryDistribution = await Promise.all(
+        allCategories.map(async (category) => {
+          const count = await Product.count({
+            where: { categoryId: category.id },
+          });
+          return { name: category.name, count };
+        }),
+      );
+
+      return {
+        users,
+        categories,
+        products,
+        orders,
+        featuredGems,
+        criticalStock,
+        revenue: Number(totalRevenueRaw || 0),
+        recentProducts: recentProducts.map((product) => ({
+          id: product.id,
+          name: product.name,
+          price: Number(product.price || 0),
+          createdAt: product.createdAt,
+        })),
+        categoryDistribution,
+      };
+    },
+  },
+
+  resources: [User, Category, productResource, Order, OrderItem, Setting],
 });
+
+if (process.env.NODE_ENV !== "production") {
+  admin.watch();
+}
 
 const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   authenticate: async (email, password) => {
