@@ -179,7 +179,24 @@ const admin = new AdminJS({
     },
   },
 
-  resources: [User, Category, productResource, Order, OrderItem, Setting],
+  resources: [
+    {
+      resource: User,
+      options: {
+        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin'
+      }
+    },
+    Category,
+    productResource,
+    Order,
+    OrderItem,
+    {
+      resource: Setting,
+      options: {
+        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin'
+      }
+    }
+  ],
 });
 
 if (process.env.NODE_ENV !== "production") {
@@ -190,7 +207,7 @@ const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   authenticate: async (email, password) => {
     const user = await User.findOne({ where: { email } });
 
-    if (user && user.role === "admin") {
+    if (user && (user.role === "admin" || user.role === "user")) {
       return user;
     }
     return null;
