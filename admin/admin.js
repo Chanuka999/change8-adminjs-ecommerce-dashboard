@@ -17,6 +17,17 @@ import {
   Setting,
 } from "../model/index.js";
 
+const isAdmin = ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin';
+
+const restrictToAdmin = {
+  list: { isAccessible: isAdmin },
+  show: { isAccessible: isAdmin },
+  new: { isAccessible: isAdmin },
+  edit: { isAccessible: isAdmin },
+  delete: { isAccessible: isAdmin },
+  bulkDelete: { isAccessible: isAdmin },
+};
+
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
@@ -182,9 +193,7 @@ const admin = new AdminJS({
   resources: [
     {
       resource: User,
-      options: {
-        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin'
-      }
+      options: { actions: restrictToAdmin }
     },
     Category,
     productResource,
@@ -192,9 +201,7 @@ const admin = new AdminJS({
     OrderItem,
     {
       resource: Setting,
-      options: {
-        isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin'
-      }
+      options: { actions: restrictToAdmin }
     }
   ],
 });
