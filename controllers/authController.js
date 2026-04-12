@@ -40,7 +40,7 @@ export const register = async (req, res) => {
       name,
       email,
       password,
-      role: "admin", // Defaulting to admin so they can access the dashboard immediately
+      role: "user", // Changed from "admin" to "user" as requested
     });
 
     res.status(201).json({
