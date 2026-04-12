@@ -17,6 +17,17 @@ import {
   Setting,
 } from "../model/index.js";
 
+const isAdmin = ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin';
+
+const restrictToAdmin = {
+  list: { isAccessible: isAdmin },
+  show: { isAccessible: isAdmin },
+  new: { isAccessible: isAdmin },
+  edit: { isAccessible: isAdmin },
+  delete: { isAccessible: isAdmin },
+  bulkDelete: { isAccessible: isAdmin },
+};
+
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
@@ -179,7 +190,20 @@ const admin = new AdminJS({
     },
   },
 
-  resources: [User, Category, productResource, Order, OrderItem, Setting],
+  resources: [
+    {
+      resource: User,
+      options: { actions: restrictToAdmin }
+    },
+    Category,
+    productResource,
+    Order,
+    OrderItem,
+    {
+      resource: Setting,
+      options: { actions: restrictToAdmin }
+    }
+  ],
 });
 
 if (process.env.NODE_ENV !== "production") {
@@ -190,7 +214,7 @@ const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   authenticate: async (email, password) => {
     const user = await User.findOne({ where: { email } });
 
-    if (user && user.role === "admin") {
+    if (user && (user.role === "admin" || user.role === "user")) {
       return user;
     }
     return null;
