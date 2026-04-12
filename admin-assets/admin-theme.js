@@ -64,10 +64,36 @@
       }
     };
 
-    relocate();
-    // Keep trying to relocate as AdminJS might re-render the header
-    setInterval(relocate, 2000);
+    // Detect login page and apply logic
+    if (window.location.pathname.includes('/login')) {
+      const injectRegisterLink = () => {
+        const loginContainer = document.querySelector('form') || document.querySelector('[data-testid="login"]');
+        if (loginContainer && !document.getElementById('change8-register-link')) {
+          const footer = document.createElement('div');
+          footer.id = 'change8-register-link';
+          footer.innerHTML = `
+            <div style="margin-top: 25px; text-align: center; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;">
+              <span style="color: #64748b;">Need an account?</span>
+              <a href="/admin/register" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 5px;">Register here</a>
+            </div>
+          `;
+          
+          // Append to the parent of the form or the form itself
+          const form = loginContainer.tagName === 'FORM' ? loginContainer : loginContainer.querySelector('form');
+          if (form) {
+            form.after(footer);
+          } else {
+            loginContainer.appendChild(footer);
+          }
+        }
+      };
+
+      injectRegisterLink();
+      setInterval(injectRegisterLink, 1000); // Handle re-renders
+      return;
+    }
   };
+创新
 
   applyTheme(getInitialTheme());
 

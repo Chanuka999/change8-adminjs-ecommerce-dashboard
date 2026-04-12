@@ -117,6 +117,14 @@ const productResource = {
 const admin = new AdminJS({
   rootPath: "/admin",
   componentLoader,
+  branding: {
+    companyName: "Change8 Commerce",
+    withMadeWithLove: false,
+  },
+  assets: {
+    styles: ["/custom/admin-theme.css?v=9.0"],
+    scripts: ["/custom/admin-theme.js?v=9.0"],
+  },
   dashboard: {
     component: Components.Dashboard,
     handler: async () => {

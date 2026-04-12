@@ -2,6 +2,8 @@ import express from "express";
 import sequelize from "./config/database.js";
 import adminRouter from "./admin/admin.js";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -15,10 +17,16 @@ import "./model/index.js";
 dotenv.config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
+app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
 
 // AdminJS route
+app.get("/admin/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin-assets", "register.html"));
+});
 app.use("/admin", adminRouter);
 app.use("/api", authRoutes);
 app.use("/api/users", userRoutes);
