@@ -1,0 +1,481 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --admin-bg: #081225;
+  --admin-surface: #0f1c34;
+  --admin-surface-2: #122444;
+  --admin-sidebar: #0b1730;
+  --admin-topbar: rgba(11, 23, 48, 0.85);
+  --admin-text: #e8edf8;
+  --admin-muted: #9aa8c1;
+  --admin-border: rgba(226, 191, 102, 0.15);
+  --admin-accent: #e2bf66;
+  --admin-font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+html[data-admin-theme="light"] {
+  --admin-bg: #f2f7ff;
+  --admin-surface: #ffffff;
+  --admin-surface-2: #f8fbff;
+  --admin-sidebar: #f8fbff;
+  --admin-topbar: #ffffff;
+  --admin-text: #0f172a;
+  --admin-muted: #475569;
+  --admin-border: rgba(15, 23, 42, 0.12);
+  --admin-accent: #c08b0f;
+}
+
+html,
+body,
+#app,
+.adminjs_Layout,
+[class*="adminjs_Layout"],
+[data-testid="layout"],
+[data-css="layout"] {
+  background: var(--admin-bg) !important;
+  background-color: var(--admin-bg) !important;
+  font-family: var(--admin-font) !important;
+}
+
+.adminjs_Sidebar,
+section[data-css="sidebar"],
+aside[data-css="sidebar"],
+aside,
+nav,
+[data-testid="sidebar"] {
+  min-height: 100vh !important;
+  background: var(--admin-sidebar) !important;
+  background-color: var(--admin-sidebar) !important;
+}
+
+.adminjs_SidebarHeader,
+.adminjs_Brand,
+.adminjs_Logo,
+[class*="Brand"],
+[class*="Logo"],
+[data-testid="sidebar-header"],
+[data-css="sidebar-header"] {
+  background: var(--admin-sidebar) !important;
+  background-color: var(--admin-sidebar) !important;
+  border-color: var(--admin-border) !important;
+}
+
+.adminjs_TopBar,
+header[data-css="topbar"],
+section[data-css="topbar"],
+.adminjs_TopBarHeader,
+header,
+[data-testid="topbar"] {
+  background: var(--admin-topbar) !important;
+  background-color: var(--admin-topbar) !important;
+  border-bottom: 1px solid var(--admin-border) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Ensure inner components inherit the themed backgrounds */
+[data-css="topbar"] *,
+[data-css="sidebar"] *,
+[data-testid="sidebar"] *,
+[data-testid="topbar"] * {
+  background-color: transparent !important;
+}
+
+.adminjs_Box,
+.adminjs_DrawerContent,
+.adminjs_Table,
+.adminjs_TableRow,
+.adminjs_Section,
+.adminjs_Label,
+.adminjs_Input,
+.adminjs_TextArea,
+.adminjs_Select,
+.adminjs_ValueGroup,
+.adminjs_MessageBox,
+.adminjs_FilterDrawer,
+.adminjs_Pagination {
+  border-color: var(--admin-border) !important;
+  border-radius: 8px !important;
+}
+
+.adminjs_Main .adminjs_Box,
+.adminjs_Main .adminjs_Section,
+.adminjs_Main .adminjs_Table,
+.adminjs_Main [data-css*="action"],
+.adminjs_Main [data-css*="wrapper"],
+.adminjs_DrawerContent .adminjs_Box,
+.adminjs_DrawerContent .adminjs_Table,
+.adminjs_DrawerContent [data-css*="action"],
+[data-css$="table"],
+[data-testid$="table"],
+[data-css*="resource-list"] {
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid var(--admin-border) !important;
+}
+
+/* Fix: Reset internal boxes inside tables to prevent stretching and bubble look */
+.adminjs_Table .adminjs_Box,
+.adminjs_Table [class*="Box"] {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: auto !important;
+  display: inline-block !important; /* Prevent vertical stretching */
+}
+
+/* Proper padding for table cells */
+.adminjs_TableCell,
+.adminjs_TableHead,
+.adminjs_Table td, 
+.adminjs_Table th {
+  padding: 12px 16px !important;
+  vertical-align: middle !important;
+  color: var(--admin-text) !important;
+}
+
+/* Ensure content inside cells (like image previews) doesn't wrap or stack weirdly */
+.adminjs_Table td > div,
+.adminjs_TableCell > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  white-space: nowrap !important;
+}
+
+.adminjs_Table td a,
+.adminjs_TableCell a {
+  color: var(--admin-accent) !important;
+}
+
+/* Fix: Reset profile/user section and topbar internal boxes to prevent stacking and squashing */
+[data-testid="topbar"] .adminjs_Box,
+[data-testid="currentUser"] .adminjs_Box,
+.adminjs_CurrentUser .adminjs_Box,
+[data-testid="topbar"] div,
+[data-testid="topbar"] section,
+[data-testid="topbar"] header {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: auto !important;
+  min-width: auto !important;
+}
+
+.adminjs_TopBar,
+[data-testid="topbar"],
+[data-css="topbar"],
+.adminjs_TopBar > div,
+[data-testid="currentUser"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+  background: transparent !important;
+}
+
+/* Specifically force transparency on very outer content wrappers to let surface show */
+[data-css*="action-content"],
+[data-css*="form-content"],
+[data-testid*="content"],
+.adminjs_Layout > div,
+.adminjs_Main > div,
+.adminjs_Main > div > div,
+[data-css$="-content"],
+[data-testid$="-content"] {
+  background: var(--admin-bg) !important;
+  background-color: var(--admin-bg) !important;
+}
+
+/* Fix white footer area around buttons */
+[data-css*="action-footer"],
+[data-testid*="footer"],
+footer,
+[data-css*="button-wrapper"],
+[class*="ButtonWrapper"] {
+  background: var(--admin-bg) !important;
+  background-color: var(--admin-bg) !important;
+  border-top: 1px solid var(--admin-border) !important;
+}
+
+/* Individual property field wrappers should be transparent to show the themed box background */
+[data-css$="-property"],
+[data-testid$="-property"],
+.adminjs_Property {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.adminjs_Input,
+.adminjs_TextArea,
+.adminjs_Select {
+  background: var(--admin-surface-2) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.adminjs_Input:focus,
+.adminjs_TextArea:focus,
+.adminjs_Select:focus {
+  border-color: var(--admin-accent) !important;
+  box-shadow: 0 0 0 3px rgba(226, 191, 102, 0.08) !important;
+  outline: none !important;
+}
+
+.adminjs_Label {
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  font-size: 13px !important;
+  color: var(--admin-muted) !important;
+}
+
+.adminjs_H1,
+.adminjs_H2,
+.adminjs_H3,
+.adminjs_H4,
+.adminjs_H5,
+.adminjs_Text,
+.adminjs_Label,
+.adminjs_Link,
+.adminjs_Table thead,
+.adminjs_Table thead *,
+.adminjs_Table thead th,
+.adminjs_Table thead th button,
+.adminjs_Table thead th span,
+.adminjs_Table thead th svg,
+.adminjs_TableHead,
+.adminjs_TableHead *,
+.adminjs_Breadcrumb,
+.adminjs_Breadcrumb a,
+.adminjs_Brand,
+.adminjs_Brand h1,
+.adminjs_Brand a {
+  color: var(--admin-text) !important;
+}
+
+.adminjs_Text[variant="sm"],
+.adminjs_Text[variant="lg"],
+.adminjs_Text[variant="xs"],
+.adminjs_Breadcrumb,
+.adminjs_Breadcrumb a {
+  color: var(--admin-muted) !important;
+}
+
+.adminjs_Button,
+[data-testid*="button"],
+[data-css*="button"] {
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-width: max-content !important;
+  border: 1px solid var(--admin-border) !important;
+  margin: 0 4px !important; /* Ensure spacing between sibling buttons */
+}
+
+.adminjs_Button.adminjs_Button--primary,
+.adminjs_Button[variant="primary"] {
+  background: var(--admin-accent) !important;
+  color: #1f2937 !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.adminjs_Button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
+  opacity: 0.9 !important;
+}
+
+/* Modern Row Action Dropdown */
+.adminjs_DropDownList,
+[data-testid="dropdown-list"] {
+  display: none !important;
+  background: var(--admin-surface-2) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 8px !important;
+  padding: 8px 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+  overflow: hidden !important;
+}
+
+/* ONLY show when AdminJS explicitly sets any display style other than none */
+.adminjs_DropDownList[style*="display: block"],
+.adminjs_DropDownList[style*="display: flex"],
+.adminjs_DropDownList[style*="display: inline"],
+[data-testid="dropdown-list"][style*="display: block"],
+[data-testid="dropdown-list"][style*="display: flex"],
+[data-testid="dropdown-list"][style*="display: inline"] {
+  display: block !important;
+}
+
+/* Hide individual action links that are cluttering the row directly */
+.adminjs_Table td [data-testid*="action-"],
+.adminjs_Table td [class*="Button"] {
+  display: none !important;
+}
+
+/* Re-enable them specifically when they are inside a dropdown list */
+.adminjs_DropDownList [data-testid*="action-"],
+[data-testid="dropdown-list"] [data-testid*="action-"],
+.adminjs_DropDownList a,
+[data-testid="dropdown-list"] a {
+  display: flex !important;
+}
+
+.adminjs_DropDownItem,
+.adminjs_DropDownItem a,
+[data-testid="dropdown-item"] {
+  display: flex !important;
+  align-items: center !important;
+  padding: 10px 18px !important;
+  color: var(--admin-text) !important;
+  text-decoration: none !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.adminjs_DropDownItem:hover,
+[data-testid="dropdown-item"]:hover {
+  background: rgba(226, 191, 102, 0.1) !important;
+}
+
+.adminjs_DropDownItem svg,
+[data-testid="dropdown-item"] svg {
+  margin-right: 12px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: inherit !important;
+}
+
+/* Specific styling for the Delete action */
+.adminjs_DropDownItem:last-child,
+[data-testid$="delete"],
+[data-testid$="Delete"],
+.adminjs_DropDownItem:has(svg[class*="Trash"]) {
+  color: #ff4d4f !important;
+}
+
+.adminjs_DropDownItem:last-child:hover,
+[data-testid$="delete"]:hover {
+  background: rgba(255, 77, 79, 0.1) !important;
+}
+
+/* Premium Sidebar Navigation Enhancements */
+[data-testid="sidebar-resource-section"] a,
+[data-testid="sidebar-item"] a,
+.adminjs_Sidebar a {
+  border-radius: 12px !important;
+  margin: 4px 14px !important;
+  padding: 12px 18px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+[data-testid="sidebar-item"] a.active,
+[data-testid="sidebar-item"] a:hover,
+.adminjs_Sidebar a:hover {
+  background: rgba(226, 191, 102, 0.1) !important;
+  color: var(--admin-accent) !important;
+  transform: translateX(4px);
+}
+
+/* Sidebar Text Visibility Fix */
+[data-testid="sidebar"] a,
+[data-testid="sidebar"] span,
+[data-testid="sidebar"] svg,
+.adminjs_Sidebar,
+.adminjs_Sidebar *,
+[data-css="sidebar"] * {
+  color: var(--admin-text) !important;
+  fill: var(--admin-text) !important;
+}
+
+[data-testid="sidebar"] a:hover *,
+[data-testid="sidebar"] a.active * {
+  color: var(--admin-accent) !important;
+  fill: var(--admin-accent) !important;
+}
+
+/* Modern Badges & Status Chips */
+.adminjs_Badge,
+[data-testid="badge"] {
+  padding: 6px 14px !important;
+  border-radius: 99px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  background: rgba(226, 191, 102, 0.1) !important;
+  border: 1px solid rgba(226, 191, 102, 0.15) !important;
+  color: var(--admin-accent) !important;
+}
+
+/* Elevated Dashboard Home Cards */
+[data-css="dashboard"] .adminjs_Box,
+[data-testid="dashboard-box"] {
+  background: linear-gradient(145deg, var(--admin-surface), var(--admin-surface-2)) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Light mode overrides for dropdown */
+html[data-admin-theme="light"] [data-testid="dropdown-list"] {
+  background: #ffffff !important;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.1) !important;
+}
+
+.change8-theme-toggle {
+  z-index: 1000;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-right: 15px;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  outline: none !important;
+}
+
+.change8-theme-toggle:hover {
+  background: var(--admin-accent);
+  color: #1f2937;
+  transform: rotate(20deg) scale(1.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.change8-theme-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+html[data-admin-theme="light"] .change8-theme-toggle {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+
