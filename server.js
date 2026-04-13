@@ -22,6 +22,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 // AdminJS route
 app.get("/admin/register", (req, res) => {
@@ -36,9 +37,15 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/uploads", uploadRoutes);
-sequelize.sync({ alter: true }).then(() => {
-  app.listen(5000, () => {
-    console.log("Server running on http://localhost:5000");
-    console.log("AdminJS: http://localhost:5000/admin");
+sequelize
+  .sync({ alter: { drop: false } })
+  .then(() => {
+    app.listen(5000, () => {
+      console.log("Server running on http://localhost:5000");
+      console.log("AdminJS: http://localhost:5000/admin");
+    });
+  })
+  .catch((error) => {
+    console.error("Database sync failed:", error);
+    process.exit(1);
   });
-});
