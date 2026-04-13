@@ -32,6 +32,43 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    paymentStatus: {
+      type: DataTypes.ENUM("pending", "paid"),
+      allowNull: false,
+      defaultValue: "pending",
+    },
+    transactionId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shippingMethod: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    trackingNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    subtotal: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    shippingFee: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    tax: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    discount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
   },
   {
     tableName: "Orders",

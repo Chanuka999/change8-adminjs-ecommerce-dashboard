@@ -149,6 +149,30 @@ const descriptionStyle = {
   whiteSpace: "pre-wrap",
 };
 
+const buttonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+  width: "100%",
+  padding: "14px 18px",
+  borderRadius: "14px",
+  border: "none",
+  background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+  color: "#ffffff",
+  fontSize: "15px",
+  fontWeight: 700,
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  boxShadow: "0 8px 16px rgba(99, 102, 241, 0.3)",
+};
+
+const buttonHoverStyle = {
+  ...buttonStyle,
+  transform: "translateY(-2px)",
+  boxShadow: "0 12px 24px rgba(99, 102, 241, 0.4)",
+};
+
 const formatCurrency = (value) => {
   const amount = Number(value || 0);
   return `Rs. ${amount.toLocaleString(undefined, {
@@ -186,6 +210,14 @@ const ProductShow = (props) => {
   const price = formatCurrency(params?.price);
   const description =
     params?.description || "No description available for this product.";
+
+  const [buttonHovered, setButtonHovered] = React.useState(false);
+
+  const handleOrderClick = () => {
+    const productId = params?.id || record?.id || "";
+    const newOrderUrl = `/admin/resources/Orders/actions/new?productId=${encodeURIComponent(String(productId))}`;
+    window.location.assign(newOrderUrl);
+  };
 
   return (
     <div style={pageStyle}>
@@ -241,6 +273,31 @@ const ProductShow = (props) => {
               </div>
               <div style={statCardStyle}>
                 <div style={statLabelStyle}>Stock</div>
+
+                <button
+                  style={buttonHovered ? buttonHoverStyle : buttonStyle}
+                  onMouseEnter={() => setButtonHovered(true)}
+                  onMouseLeave={() => setButtonHovered(false)}
+                  onClick={handleOrderClick}
+                  title="Click to create a new order for this product"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                  </svg>
+                  Order Now
+                </button>
                 <div style={statValueStyle}>{stock}</div>
               </div>
               <div style={statCardStyle}>

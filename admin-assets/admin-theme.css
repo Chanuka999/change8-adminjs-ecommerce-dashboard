@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
 
 :root {
   --admin-bg: #081225;
@@ -10,7 +10,7 @@
   --admin-muted: #9aa8c1;
   --admin-border: rgba(226, 191, 102, 0.15);
   --admin-accent: #e2bf66;
-  --admin-font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --admin-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 }
 
 html[data-admin-theme="light"] {
@@ -81,6 +81,151 @@ header,
   background-color: transparent !important;
 }
 
+/* Topbar profile visibility fixes (email + logout menu) */
+[data-testid="currentUser"],
+[data-css*="current-user"],
+[data-css*="currentUser"] {
+  color: var(--admin-text) !important;
+}
+
+[data-testid="currentUser"] *,
+[data-css*="current-user"] *,
+[data-css*="currentUser"] * {
+  color: var(--admin-text) !important;
+  fill: var(--admin-text) !important;
+}
+
+[data-testid="currentUser"] button,
+[data-testid="currentUser"] a,
+[data-css*="current-user"] button,
+[data-css*="current-user"] a,
+[data-css*="currentUser"] button,
+[data-css*="currentUser"] a {
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 10px !important;
+  padding: 6px 10px !important;
+}
+
+/* Ensure user dropdown keeps a visible surface (not transparent) */
+[data-testid="currentUser"] [role="menu"],
+[data-testid="currentUser"] [role="menu"] *,
+[data-css*="current-user"] [role="menu"],
+[data-css*="current-user"] [role="menu"] *,
+[data-css*="currentUser"] [role="menu"],
+[data-css*="currentUser"] [role="menu"] * {
+  background: var(--admin-surface-2) !important;
+  background-color: var(--admin-surface-2) !important;
+  color: var(--admin-text) !important;
+  fill: var(--admin-text) !important;
+}
+
+[data-testid="currentUser"] [role="menu"] {
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden !important;
+}
+
+[data-testid="currentUser"] [role="menuitem"],
+[data-css*="current-user"] [role="menuitem"],
+[data-css*="currentUser"] [role="menuitem"] {
+  background: var(--admin-surface-2) !important;
+  color: var(--admin-text) !important;
+}
+
+[data-testid="currentUser"] [role="menuitem"]:hover,
+[data-css*="current-user"] [role="menuitem"]:hover,
+[data-css*="currentUser"] [role="menuitem"]:hover {
+  background: rgba(226, 191, 102, 0.12) !important;
+}
+
+/* Strong profile text contrast overrides */
+[data-testid="topbar"] [data-testid="currentUser"],
+[data-testid="topbar"] [data-testid="currentUser"] *,
+[data-testid="topbar"] [data-css*="current-user"],
+[data-testid="topbar"] [data-css*="current-user"] *,
+[data-testid="topbar"] [data-css*="currentUser"],
+[data-testid="topbar"] [data-css*="currentUser"] * {
+  color: #f8fafc !important;
+  fill: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+html[data-admin-theme="light"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"],
+html[data-admin-theme="light"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"]
+  *,
+html[data-admin-theme="light"]
+  [data-testid="topbar"]
+  [data-css*="current-user"],
+html[data-admin-theme="light"]
+  [data-testid="topbar"]
+  [data-css*="current-user"]
+  *,
+html[data-admin-theme="light"] [data-testid="topbar"] [data-css*="currentUser"],
+html[data-admin-theme="light"]
+  [data-testid="topbar"]
+  [data-css*="currentUser"]
+  * {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+}
+
+/* Dropdown menus are often rendered in a portal, so style globally */
+[role="menu"],
+[data-testid="dropdown-list"],
+[class*="DropDownList"] {
+  background: #122444 !important;
+  background-color: #122444 !important;
+  border: 1px solid rgba(226, 191, 102, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+[role="menu"] *,
+[data-testid="dropdown-list"] *,
+[class*="DropDownList"] * {
+  color: #f8fafc !important;
+  fill: #f8fafc !important;
+}
+
+[role="menuitem"],
+[data-testid="dropdown-item"],
+[class*="DropDownItem"] {
+  background: #122444 !important;
+  color: #f8fafc !important;
+}
+
+[role="menuitem"]:hover,
+[data-testid="dropdown-item"]:hover,
+[class*="DropDownItem"]:hover {
+  background: rgba(226, 191, 102, 0.18) !important;
+}
+
+[role="menuitem"] *:last-child,
+[data-testid="dropdown-item"] *:last-child {
+  color: #f8fafc !important;
+}
+
+html[data-admin-theme="light"] [role="menu"],
+html[data-admin-theme="light"] [data-testid="dropdown-list"],
+html[data-admin-theme="light"] [class*="DropDownList"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.14) !important;
+}
+
+html[data-admin-theme="light"] [role="menu"] *,
+html[data-admin-theme="light"] [data-testid="dropdown-list"] *,
+html[data-admin-theme="light"] [class*="DropDownList"] * {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+}
+
 .adminjs_Box,
 .adminjs_DrawerContent,
 .adminjs_Table,
@@ -132,7 +277,7 @@ header,
 /* Proper padding for table cells */
 .adminjs_TableCell,
 .adminjs_TableHead,
-.adminjs_Table td, 
+.adminjs_Table td,
 .adminjs_Table th {
   padding: 12px 16px !important;
   vertical-align: middle !important;
@@ -429,7 +574,11 @@ footer,
 /* Elevated Dashboard Home Cards */
 [data-css="dashboard"] .adminjs_Box,
 [data-testid="dashboard-box"] {
-  background: linear-gradient(145deg, var(--admin-surface), var(--admin-surface-2)) !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-surface),
+    var(--admin-surface-2)
+  ) !important;
   border: 1px solid var(--admin-border) !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
 }
@@ -477,5 +626,3 @@ html[data-admin-theme="light"] [data-testid="dropdown-list"] {
 html[data-admin-theme="light"] .change8-theme-toggle {
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
-
-
