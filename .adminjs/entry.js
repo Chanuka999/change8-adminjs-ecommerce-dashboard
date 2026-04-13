@@ -5,6 +5,12 @@ import ProductCardsList from '../admin/product-cards-list'
 AdminJS.UserComponents.ProductCardsList = ProductCardsList
 import ProductShow from '../admin/product-show'
 AdminJS.UserComponents.ProductShow = ProductShow
+import OrderCreate from '../admin/order-create'
+AdminJS.UserComponents.OrderCreate = OrderCreate
+import OrderShow from '../admin/order-show'
+AdminJS.UserComponents.OrderShow = OrderShow
+import OrderItemShow from '../admin/order-item-show'
+AdminJS.UserComponents.OrderItemShow = OrderItemShow
 import ProductImage from '../admin/product-image'
 AdminJS.UserComponents.ProductImage = ProductImage
 import ProductImageUpload from '../admin/product-image-upload'
