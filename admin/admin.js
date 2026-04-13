@@ -53,6 +53,18 @@ const Components = {
     "ProductShow",
     path.join(__dirname, "product-show.jsx"),
   ),
+  OrderCreate: componentLoader.add(
+    "OrderCreate",
+    path.join(__dirname, "order-create.jsx"),
+  ),
+  OrderShow: componentLoader.add(
+    "OrderShow",
+    path.join(__dirname, "order-show.jsx"),
+  ),
+  OrderItemShow: componentLoader.add(
+    "OrderItemShow",
+    path.join(__dirname, "order-item-show.jsx"),
+  ),
   ProductImage: componentLoader.add(
     "ProductImage",
     path.join(__dirname, "product-image.jsx"),
@@ -164,6 +176,9 @@ const admin = new AdminJS({
     translations: {
       labels: {
         navigation: "Shop Management",
+        "Shop Management": "Shop Management",
+        Orders: "Orders",
+        OrderItems: "Order Items",
       },
     },
   },
@@ -247,12 +262,25 @@ const admin = new AdminJS({
       resource: Order,
       options: {
         navigation: shopNavigation,
+        actions: {
+          new: {
+            component: Components.OrderCreate,
+          },
+          show: {
+            component: Components.OrderShow,
+          },
+        },
       },
     },
     {
       resource: OrderItem,
       options: {
         navigation: shopNavigation,
+        actions: {
+          show: {
+            component: Components.OrderItemShow,
+          },
+        },
       },
     },
     {
@@ -277,6 +305,310 @@ const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   },
   cookieName: "adminjs",
   cookiePassword: "secretcookie",
+});
+
+router.get("/context/order-create", async (req, res) => {
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "name", "email", "role"],
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    const productId = req.query?.productId;
+
+    const [users, products, orderRows, selectedProduct] = await Promise.all([
+      currentUser.role === "admin"
+        ? User.findAll({
+            attributes: ["id", "name", "email", "role"],
+            order: [["id", "DESC"]],
+          })
+        : Promise.resolve([currentUser]),
+      Product.findAll({
+        attributes: ["id", "name", "sku", "price", "imageUrl", "isActive"],
+        order: [["id", "DESC"]],
+      }),
+      Order.findAll({ attributes: ["userId"], raw: true }),
+      productId
+        ? Product.findByPk(productId, {
+            attributes: ["id", "name", "sku", "price", "imageUrl", "isActive"],
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const orderCountByUser = orderRows.reduce((acc, row) => {
+      const key = String(row.userId);
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    return res.json({
+      currentUser,
+      users,
+      products,
+      selectedProduct,
+      orderCountByUser,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/context/order-create/submit", async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      await transaction.rollback();
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "role"],
+      transaction,
+    });
+
+    if (!currentUser) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    const rawPayload =
+      (req.body && Object.keys(req.body).length ? req.body : null) ||
+      req.fields ||
+      {};
+
+    const payload =
+      typeof rawPayload?.payload === "string"
+        ? JSON.parse(rawPayload.payload)
+        : rawPayload;
+
+    const lineItems = Array.isArray(payload.lineItems) ? payload.lineItems : [];
+
+    if (!lineItems.length) {
+      await transaction.rollback();
+      return res
+        .status(400)
+        .json({ message: "At least one line item is required" });
+    }
+
+    const resolvedUserId =
+      currentUser.role === "user"
+        ? currentUser.id
+        : Number(payload.userId || 0);
+
+    if (!resolvedUserId) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Customer is required" });
+    }
+
+    const order = await Order.create(
+      {
+        userId: resolvedUserId,
+        status: payload.status || "pending",
+        paymentMethod: payload.paymentMethod || null,
+        paymentStatus: payload.paymentStatus || "pending",
+        transactionId: payload.transactionId || null,
+        shippingMethod: payload.shippingMethod || null,
+        trackingNumber: payload.trackingNumber || null,
+        subtotal: payload.subtotal ?? 0,
+        shippingFee: payload.shippingFee ?? 0,
+        tax: payload.tax ?? 0,
+        discount: payload.discount ?? 0,
+        totalAmount: payload.totalAmount ?? 0,
+        shippingAddress: payload.shippingAddress || null,
+      },
+      { transaction },
+    );
+
+    const normalizedItems = lineItems
+      .map((item) => {
+        const quantity = Math.max(1, Number(item.quantity || 1));
+        const unitPrice = Math.max(0, Number(item.unitPrice || 0));
+        const totalPrice = quantity * unitPrice;
+
+        return {
+          orderId: order.id,
+          productId: Number(item.productId || 0),
+          quantity,
+          unitPrice,
+          totalPrice,
+        };
+      })
+      .filter((item) => item.productId > 0);
+
+    if (!normalizedItems.length) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Valid line items are required" });
+    }
+
+    await OrderItem.bulkCreate(normalizedItems, { transaction });
+
+    await transaction.commit();
+    return res.status(201).json({ id: order.id });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(400).json({ message: error.message });
+  }
+});
+
+router.get("/context/orders/:id/details", async (req, res) => {
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "role"],
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email", "role"],
+        },
+        {
+          model: OrderItem,
+          as: "items",
+          include: [
+            {
+              model: Product,
+              as: "product",
+              attributes: ["id", "name", "sku", "imageUrl", "price"],
+            },
+          ],
+        },
+      ],
+      order: [[{ model: OrderItem, as: "items" }, "id", "ASC"]],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (
+      currentUser.role === "user" &&
+      Number(order.userId) !== Number(currentUser.id)
+    ) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    return res.json(order);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/context/order-items/:id/details", async (req, res) => {
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "role", "name", "email"],
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    const orderItem = await OrderItem.findByPk(req.params.id, {
+      include: [
+        {
+          model: Order,
+          as: "order",
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "name", "email", "role"],
+            },
+          ],
+        },
+        {
+          model: Product,
+          as: "product",
+          attributes: ["id", "name", "sku", "imageUrl", "price", "stock"],
+        },
+      ],
+    });
+
+    if (!orderItem) {
+      return res.status(404).json({ message: "Order item not found" });
+    }
+
+    if (
+      currentUser.role === "user" &&
+      Number(orderItem?.order?.userId) !== Number(currentUser.id)
+    ) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    return res.json(orderItem);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 });
 
 export default router;
