@@ -17,7 +17,8 @@ import {
   Setting,
 } from "../model/index.js";
 
-const isAdmin = ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin';
+const isAdmin = ({ currentAdmin }) =>
+  currentAdmin && currentAdmin.role === "admin";
 
 const restrictToAdmin = {
   list: { isAccessible: isAdmin },
@@ -26,6 +27,11 @@ const restrictToAdmin = {
   edit: { isAccessible: isAdmin },
   delete: { isAccessible: isAdmin },
   bulkDelete: { isAccessible: isAdmin },
+};
+
+const shopNavigation = {
+  name: "Shop Management",
+  icon: "Store",
 };
 
 // register adapter
@@ -38,6 +44,14 @@ const Components = {
   Dashboard: componentLoader.add(
     "Dashboard",
     path.join(__dirname, "dashboard.jsx"),
+  ),
+  ProductCardsList: componentLoader.add(
+    "ProductCardsList",
+    path.join(__dirname, "product-cards-list.jsx"),
+  ),
+  ProductShow: componentLoader.add(
+    "ProductShow",
+    path.join(__dirname, "product-show.jsx"),
   ),
   ProductImage: componentLoader.add(
     "ProductImage",
@@ -52,6 +66,20 @@ const Components = {
 const productResource = {
   resource: Product,
   options: {
+    navigation: shopNavigation,
+    actions: {
+      list: {
+        component: Components.ProductCardsList,
+      },
+      show: {
+        isAccessible: () => true,
+        component: Components.ProductShow,
+      },
+      new: { isAccessible: isAdmin },
+      edit: { isAccessible: isAdmin },
+      delete: { isAccessible: isAdmin },
+      bulkDelete: { isAccessible: isAdmin },
+    },
     listProperties: [
       "name",
       "categoryId",
@@ -129,8 +157,15 @@ const admin = new AdminJS({
   rootPath: "/admin",
   componentLoader,
   branding: {
-    companyName: "Change8 Commerce",
+    companyName: "Shop Management",
     withMadeWithLove: false,
+  },
+  locale: {
+    translations: {
+      labels: {
+        navigation: "Shop Management",
+      },
+    },
   },
   assets: {
     styles: ["/custom/admin-theme.css?v=10.0"],
@@ -193,16 +228,37 @@ const admin = new AdminJS({
   resources: [
     {
       resource: User,
-      options: { actions: restrictToAdmin }
+      options: { actions: restrictToAdmin },
     },
-    Category,
+    {
+      resource: Category,
+      options: {
+        navigation: shopNavigation,
+        actions: {
+          new: { isAccessible: isAdmin },
+          edit: { isAccessible: isAdmin },
+          delete: { isAccessible: isAdmin },
+          bulkDelete: { isAccessible: isAdmin },
+        },
+      },
+    },
     productResource,
-    Order,
-    OrderItem,
+    {
+      resource: Order,
+      options: {
+        navigation: shopNavigation,
+      },
+    },
+    {
+      resource: OrderItem,
+      options: {
+        navigation: shopNavigation,
+      },
+    },
     {
       resource: Setting,
-      options: { actions: restrictToAdmin }
-    }
+      options: { actions: restrictToAdmin },
+    },
   ],
 });
 
