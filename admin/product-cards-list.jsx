@@ -17,14 +17,18 @@ const cardStyle = {
 
 const imageWrapStyle = {
   width: "100%",
-  height: "160px",
+  height: "200px",
   background: "#0f172a",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "8px",
 };
 
 const imageStyle = {
   width: "100%",
   height: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
 };
 
 const bodyStyle = {
