@@ -26,6 +26,58 @@
       theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode";
   };
 
+  const mountRegisterLinkOnLogin = () => {
+    const findLoginButton = () => {
+      const candidates = Array.from(document.querySelectorAll("button"));
+      return candidates.find((btn) => {
+        const text = (btn.textContent || "").trim().toLowerCase();
+        return text === "login" || text === "sign in";
+      });
+    };
+
+    const injectRegisterLink = () => {
+      const loginBtn =
+        findLoginButton() || document.querySelector(".adminjs_Button");
+      const loginContainer = loginBtn ? loginBtn.parentElement : null;
+
+      if (!loginContainer) {
+        return;
+      }
+
+      const existing = document.getElementById("change8-register-link");
+      if (existing) {
+        return;
+      }
+
+      const footer = document.createElement("div");
+      footer.id = "change8-register-link";
+      footer.style.marginTop = "14px";
+      footer.style.textAlign = "center";
+      footer.innerHTML =
+        '<div style="font-size: 14px; font-family: \"Plus Jakarta Sans\", sans-serif;">' +
+        '<span style="color: #64748b;">Need an account?</span>' +
+        '<a href="/admin/register" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 6px;">Register here</a>' +
+        "</div>";
+
+      loginContainer.after(footer);
+    };
+
+    injectRegisterLink();
+
+    if (!window.__change8LoginObserver) {
+      const observer = new MutationObserver(() => {
+        injectRegisterLink();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      window.__change8LoginObserver = observer;
+    }
+  };
+
   const mountToggle = () => {
     if (document.getElementById("change8-theme-toggle")) {
       return;
@@ -59,64 +111,22 @@
         document.querySelector("header");
 
       if (topbar) {
-
+        const currentUser =
           document.querySelector('[data-testid="currentUser"]') ||
           topbar.querySelector("div:last-child") ||
           topbar;
 
-
+        if (currentUser && !currentUser.contains(button)) {
+          currentUser.insertBefore(button, currentUser.firstChild);
         }
       } else if (!document.body.contains(button)) {
         document.body.appendChild(button);
       }
     };
 
-    // Detect login page and apply logic
+    // Detect login page and place Register link under Login button
     if (window.location.pathname.includes("/login")) {
-
-          document.querySelector("button") ||
-          document.querySelector(".adminjs_Button");
-        const loginContainer = loginBtn ? loginBtn.parentElement : null;
-
-        if (
-          loginContainer &&
-          !document.getElementById("change8-register-link")
-        ) {
-          const footer = document.createElement("div");
-          footer.id = "change8-register-link";
-          footer.style.marginTop = "20px";
-          footer.style.textAlign = "center";
-          footer.innerHTML = `
-            <div style="font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;">
-              <span style="color: #64748b;">Need an account?</span>
-              <a href="/admin/register" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 5px;">Register here</a>
-            </div>
-          `;
-          loginContainer.after(footer);
-        }
-      };
-
-      const applyLoginEnhancements = () => {
-        injectLoginInputStyles();
-        ensureLoginImageBackground();
-        styleLoginPage();
-        injectRegisterLink();
-      };
-
-      applyLoginEnhancements();
-
-      if (!window.__change8LoginObserver) {
-        const observer = new MutationObserver(() => {
-          applyLoginEnhancements();
-        });
-
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-
-        window.__change8LoginObserver = observer;
-      }
+      mountRegisterLinkOnLogin();
 
       return;
     }
