@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 
 const pageStyle = {
@@ -258,6 +257,14 @@ const OrderShow = ({ record }) => {
               <strong>{details?.user?.name || "-"}</strong>
             </div>
             <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Shipping Contact</span>
+              <strong>{details?.shippingName || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Shipping Phone</span>
+              <strong>{details?.shippingPhone || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
               <span style={{ color: "#94a3b8" }}>Email</span>
               <strong>{details?.user?.email || "-"}</strong>
             </div>
@@ -290,11 +297,9 @@ const OrderShow = ({ record }) => {
               <div style={{ whiteSpace: "pre-wrap" }}>
                 {details?.shippingAddress || "-"}
               </div>
-
             </div>
           </div>
         </div>
-
 
         <div style={cardStyle}>
           <h2 style={sectionTitleStyle}>Order Summary / Totals</h2>
@@ -361,7 +366,8 @@ const OrderShow = ({ record }) => {
                     {item?.productId}
                   </span>
                   <span style={{ color: "#cbd5e1", fontSize: "12px" }}>
-                    Qty: {item.quantity} x {formatMoney(item.unitPrice)}
+                    Size: {item?.size || "-"} | Qty: {item.quantity} x{" "}
+                    {formatMoney(item.unitPrice)}
                   </span>
                 </div>
 
@@ -371,7 +377,6 @@ const OrderShow = ({ record }) => {
               </div>
             ))
           )}
-
         </div>
       </div>
     </div>
