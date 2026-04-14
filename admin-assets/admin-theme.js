@@ -14,12 +14,16 @@
     if (saved === "dark" || saved === "light") {
       return saved;
     }
-    return "dark";
+    return window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
   };
 
   const updateButtonIcon = (button, theme) => {
     button.innerHTML = theme === "dark" ? SUN_ICON : MOON_ICON;
-    button.title = theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode";
+    button.title =
+      theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode";
   };
 
   const mountToggle = () => {
@@ -30,6 +34,10 @@
     const button = document.createElement("button");
     button.id = "change8-theme-toggle";
     button.className = "change8-theme-toggle";
+    button.type = "button";
+    button.style.position = "static";
+    button.style.marginRight = "12px";
+    button.style.flex = "0 0 auto";
 
     let currentTheme = getInitialTheme();
     applyTheme(currentTheme);
@@ -44,20 +52,21 @@
 
     // Try to append to header/topbar, otherwise fallback to body
     const relocate = () => {
-      const topbar = document.querySelector('.adminjs_TopBar') || 
-                     document.querySelector('[data-css="topbar"]') || 
-                     document.querySelector('[data-testid="topbar"]') || 
-                     document.querySelector('header');
-                     
+      const topbar =
+        document.querySelector(".adminjs_TopBar") ||
+        document.querySelector('[data-css="topbar"]') ||
+        document.querySelector('[data-testid="topbar"]') ||
+        document.querySelector("header");
+
       if (topbar) {
-        // Find the right section (usually has currentUser or is the last div)
-        const rightSection = document.querySelector('[data-testid="currentUser"]') || 
-                             topbar.querySelector('div:last-child') || 
-                             topbar;
-                             
-        if (rightSection && !rightSection.contains(button)) {
-           // Insert as the first child of the right section to stay next to profile
-           rightSection.insertBefore(button, rightSection.firstChild);
+        // Place the toggle directly before the user identity block so it appears left of the email.
+        const currentUser =
+          document.querySelector('[data-testid="currentUser"]') ||
+          topbar.querySelector("div:last-child") ||
+          topbar;
+
+        if (currentUser && !currentUser.contains(button)) {
+          currentUser.insertBefore(button, currentUser.firstChild);
         }
       } else if (!document.body.contains(button)) {
         document.body.appendChild(button);
@@ -65,17 +74,22 @@
     };
 
     // Detect login page and apply logic
-    if (window.location.pathname.includes('/login')) {
+    if (window.location.pathname.includes("/login")) {
       const injectRegisterLink = () => {
         // Target the parent div of the login button specifically
-        const loginBtn = document.querySelector('button') || document.querySelector('.adminjs_Button');
+        const loginBtn =
+          document.querySelector("button") ||
+          document.querySelector(".adminjs_Button");
         const loginContainer = loginBtn ? loginBtn.parentElement : null;
-        
-        if (loginContainer && !document.getElementById('change8-register-link')) {
-          const footer = document.createElement('div');
-          footer.id = 'change8-register-link';
-          footer.style.marginTop = '20px';
-          footer.style.textAlign = 'center';
+
+        if (
+          loginContainer &&
+          !document.getElementById("change8-register-link")
+        ) {
+          const footer = document.createElement("div");
+          footer.id = "change8-register-link";
+          footer.style.marginTop = "20px";
+          footer.style.textAlign = "center";
           footer.innerHTML = `
             <div style="font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;">
               <span style="color: #64748b;">Need an account?</span>

@@ -61,6 +61,18 @@ const Components = {
     "ProductImageUpload",
     path.join(__dirname, "product-image-upload.jsx"),
   ),
+  CategoryShow: componentLoader.add(
+    "CategoryShow",
+    path.join(__dirname, "category-show.jsx"),
+  ),
+  OrderShow: componentLoader.add(
+    "OrderShow",
+    path.join(__dirname, "order-show.jsx"),
+  ),
+  OrderItemShow: componentLoader.add(
+    "OrderItemShow",
+    path.join(__dirname, "order-item-show.jsx"),
+  ),
 };
 
 const productResource = {
@@ -168,8 +180,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=10.0"],
-    scripts: ["/custom/admin-theme.js?v=10.0"],
+    styles: ["/custom/admin-theme.css?v=10.1"],
+    scripts: ["/custom/admin-theme.js?v=10.1"],
   },
   dashboard: {
     component: Components.Dashboard,
@@ -235,6 +247,9 @@ const admin = new AdminJS({
       options: {
         navigation: shopNavigation,
         actions: {
+          show: {
+            component: Components.CategoryShow,
+          },
           new: { isAccessible: isAdmin },
           edit: { isAccessible: isAdmin },
           delete: { isAccessible: isAdmin },
@@ -247,12 +262,22 @@ const admin = new AdminJS({
       resource: Order,
       options: {
         navigation: shopNavigation,
+        actions: {
+          show: {
+            component: Components.OrderShow,
+          },
+        },
       },
     },
     {
       resource: OrderItem,
       options: {
         navigation: shopNavigation,
+        actions: {
+          show: {
+            component: Components.OrderItemShow,
+          },
+        },
       },
     },
     {
