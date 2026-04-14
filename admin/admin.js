@@ -45,6 +45,10 @@ const Components = {
     "Dashboard",
     path.join(__dirname, "dashboard.jsx"),
   ),
+  Register: componentLoader.add(
+    "Register",
+    path.join(__dirname, "register.jsx"),
+  ),
   ProductCardsList: componentLoader.add(
     "ProductCardsList",
     path.join(__dirname, "product-cards-list.jsx"),
@@ -237,6 +241,12 @@ const admin = new AdminJS({
         })),
         categoryDistribution,
       };
+    },
+  },
+  pages: {
+    register: {
+      label: "Register",
+      component: Components.Register,
     },
   },
 
