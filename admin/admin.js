@@ -199,8 +199,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=10.1"],
-    scripts: ["/custom/admin-theme.js?v=10.1"],
+    styles: ["/custom/admin-theme.css?v=10.2"],
+    scripts: ["/custom/admin-theme.js?v=10.2"],
   },
   dashboard: {
     component: Components.Dashboard,
@@ -255,13 +255,6 @@ const admin = new AdminJS({
       };
     },
   },
-  pages: {
-    register: {
-      label: "Register",
-      component: Components.Register,
-    },
-  },
-
   resources: [
     {
       resource: User,
@@ -288,7 +281,6 @@ const admin = new AdminJS({
       options: {
         navigation: shopNavigation,
         actions: {
-
           show: {
             component: Components.OrderShow,
           },
