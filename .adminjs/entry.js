@@ -1,6 +1,8 @@
 AdminJS.UserComponents = {}
 import Dashboard from '../admin/dashboard'
 AdminJS.UserComponents.Dashboard = Dashboard
+import Register from '../admin/register'
+AdminJS.UserComponents.Register = Register
 import ProductCardsList from '../admin/product-cards-list'
 AdminJS.UserComponents.ProductCardsList = ProductCardsList
 import ProductShow from '../admin/product-show'
