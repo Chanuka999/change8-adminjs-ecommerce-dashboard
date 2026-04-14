@@ -59,14 +59,12 @@
         document.querySelector("header");
 
       if (topbar) {
-        // Place the toggle directly before the user identity block so it appears left of the email.
-        const currentUser =
+
           document.querySelector('[data-testid="currentUser"]') ||
           topbar.querySelector("div:last-child") ||
           topbar;
 
-        if (currentUser && !currentUser.contains(button)) {
-          currentUser.insertBefore(button, currentUser.firstChild);
+
         }
       } else if (!document.body.contains(button)) {
         document.body.appendChild(button);
@@ -75,9 +73,7 @@
 
     // Detect login page and apply logic
     if (window.location.pathname.includes("/login")) {
-      const injectRegisterLink = () => {
-        // Target the parent div of the login button specifically
-        const loginBtn =
+
           document.querySelector("button") ||
           document.querySelector(".adminjs_Button");
         const loginContainer = loginBtn ? loginBtn.parentElement : null;
@@ -100,9 +96,44 @@
         }
       };
 
-      injectRegisterLink();
-      setInterval(injectRegisterLink, 500); // Robust polling for dynamic AdminJS UI
+      const applyLoginEnhancements = () => {
+        injectLoginInputStyles();
+        ensureLoginImageBackground();
+        styleLoginPage();
+        injectRegisterLink();
+      };
+
+      applyLoginEnhancements();
+
+      if (!window.__change8LoginObserver) {
+        const observer = new MutationObserver(() => {
+          applyLoginEnhancements();
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+
+        window.__change8LoginObserver = observer;
+      }
+
       return;
+    }
+
+    relocate();
+
+    if (!window.__change8ThemeObserver) {
+      const observer = new MutationObserver(() => {
+        relocate();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      window.__change8ThemeObserver = observer;
     }
   };
 

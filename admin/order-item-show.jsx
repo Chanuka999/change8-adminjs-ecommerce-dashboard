@@ -1,485 +1,375 @@
-import React, { useEffect, useState } from "react";
 
-const OrderItemShow = (props) => {
-  const { record } = props;
-  const [item, setItem] = useState(null);
+import React, { useEffect, useMemo, useState } from "react";
 
-  useEffect(() => {
-    if (record && record.params) {
-      setItem(record.params);
-    }
-  }, [record]);
+const pageStyle = {
+  display: "grid",
+  gap: "16px",
+  color: "#e2e8f0",
+};
 
-  if (!item) {
-    return <div className="order-item-show-loading">Loading...</div>;
+const cardStyle = {
+  borderRadius: "18px",
+  border: "1px solid rgba(148, 163, 184, 0.2)",
+  background:
+    "linear-gradient(155deg, rgba(10, 23, 48, 0.94) 0%, rgba(8, 18, 38, 0.94) 100%)",
+  boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
+  padding: "18px",
+};
+
+const headerStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "12px",
+  alignItems: "center",
+};
+
+const titleStyle = {
+  margin: 0,
+  fontSize: "34px",
+  lineHeight: 1.1,
+  color: "#f8fafc",
+};
+
+const subtitleStyle = {
+  margin: "6px 0 0 0",
+  color: "#94a3b8",
+  fontSize: "13px",
+};
+
+const badgeStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  width: "fit-content",
+  padding: "6px 12px",
+  borderRadius: "999px",
+  fontSize: "11px",
+  fontWeight: 800,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "#14532d",
+  background: "#bbf7d0",
+};
+
+const gridStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(300px, 0.95fr) minmax(320px, 1.05fr)",
+  gap: "16px",
+};
+
+const sectionTitleStyle = {
+  margin: "0 0 12px 0",
+  color: "#f5df90",
+  fontSize: "12px",
+  fontWeight: 800,
+  letterSpacing: "0.11em",
+  textTransform: "uppercase",
+};
+
+const infoGridStyle = {
+  display: "grid",
+  gap: "8px",
+};
+
+const infoRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "10px",
+  borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+  paddingBottom: "8px",
+  fontSize: "13px",
+};
+
+const imageStyle = {
+  width: "100%",
+  height: "280px",
+  objectFit: "cover",
+  borderRadius: "14px",
+  background: "#0f172a",
+  border: "1px solid rgba(148, 163, 184, 0.22)",
+};
+
+const lineItemStyle = {
+  display: "grid",
+  gridTemplateColumns: "84px 1fr auto",
+  gap: "12px",
+  alignItems: "center",
+  padding: "12px",
+  borderRadius: "14px",
+  border: "1px solid rgba(148, 163, 184, 0.2)",
+  background: "rgba(15, 23, 42, 0.44)",
+};
+
+const emptyImageStyle = {
+  width: "84px",
+  height: "84px",
+  borderRadius: "12px",
+  background: "#0f172a",
+  border: "1px solid rgba(148, 163, 184, 0.22)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#94a3b8",
+  fontSize: "11px",
+};
+
+const totalRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "13px",
+  borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+  paddingBottom: "7px",
+};
+
+const grandStyle = {
+  ...totalRowStyle,
+  borderBottom: "none",
+  paddingTop: "6px",
+  fontWeight: 800,
+  fontSize: "18px",
+  color: "#f8fafc",
+};
+
+const emptyStyle = {
+  border: "1px dashed rgba(148, 163, 184, 0.35)",
+  borderRadius: "12px",
+  padding: "14px",
+  color: "#cbd5e1",
+};
+
+const formatMoney = (value) => {
+  const n = Number(value || 0);
+  return `Rs. ${n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+const formatDate = (value) => {
+  if (!value) {
+    return "-";
   }
 
-  const formatDate = (date) => {
-    if (!date) return "—";
-    try {
-      return new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return "—";
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) {
+    return String(value);
+  }
+
+  return dt.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+};
+
+const OrderItemShow = ({ record }) => {
+  const [details, setDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const orderItemId = record?.params?.id || record?.id;
+
+  useEffect(() => {
+    if (!orderItemId) {
+      setLoading(false);
+      setError("Order item id not found");
+      return;
     }
-  };
 
-  const formatCurrency = (value) => {
-    return `Rs.${Number(value || 0).toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
+    const loadDetails = async () => {
+      try {
+        setError("");
+        const response = await fetch(
+          `/admin/context/order-items/${encodeURIComponent(String(orderItemId))}/details`,
+          { credentials: "same-origin" },
+        );
 
-  const unitPrice = Number(item.unitPrice || 0);
-  const quantity = Number(item.quantity || 0);
-  const totalPrice = Number(item.totalPrice || 0);
-  const savingsPerItem =
-    unitPrice > 0
-      ? (
-          ((unitPrice * quantity - totalPrice) / (unitPrice * quantity)) *
-          100
-        ).toFixed(2)
-      : 0;
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            payload?.message || "Failed to load order item details",
+          );
+        }
+
+        setDetails(payload);
+      } catch (fetchError) {
+        setError(fetchError?.message || "Failed to load order item details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDetails();
+  }, [orderItemId]);
+
+  const calculatedTotal = useMemo(() => {
+    return Number(details?.totalPrice || 0);
+  }, [details]);
+
+  if (loading) {
+    return <div style={emptyStyle}>Loading order item details...</div>;
+  }
+
+  if (error) {
+    return <div style={emptyStyle}>{error}</div>;
+  }
+
+  if (!details) {
+    return <div style={emptyStyle}>Order item details not available.</div>;
+  }
+
+  const product = details?.product || {};
+  const order = details?.order || {};
+  const customer = order?.user || {};
 
   return (
-    <div className="order-item-show-container">
-      <style>{`
-        .order-item-show-container {
-          --bg-1: var(--change8-bg-1, #050914);
-          --gold: var(--change8-gold, #e2bf66);
-          --text-main: var(--change8-text-main, #f8fafc);
-          --text-muted: var(--change8-text-muted, #9aa8c1);
-          --line: var(--change8-line, rgba(226, 191, 102, 0.22));
-          --card-bg: var(--change8-card-bg, linear-gradient(160deg, rgba(21, 34, 66, 0.96) 0%, rgba(10, 18, 36, 0.96) 100%));
-          --shadow: var(--change8-shadow, 0 8px 26px rgba(0, 0, 0, 0.3));
+    <div style={pageStyle}>
+      <style>{`@media (max-width: 1040px) { .change8-order-item-grid { grid-template-columns: 1fr !important; } }`}</style>
 
-          padding: 32px;
-          color: var(--text-main);
-          font-family: "Poppins", "Segoe UI", sans-serif;
-          background: linear-gradient(120deg, var(--bg-1) 0%, rgba(11, 26, 56, 0.8) 50%, var(--bg-1) 100%);
-          min-height: 100vh;
-        }
-
-        html[data-admin-theme='light'] .order-item-show-container {
-          --change8-bg-1: #f0f6ff;
-          --change8-gold: #c08b0f;
-          --change8-text-main: #0f172a;
-          --change8-text-muted: #475569;
-          --change8-line: rgba(15, 23, 42, 0.08);
-          --change8-card-bg: #ffffff;
-          --change8-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-        }
-
-        .order-item-show-inner {
-          max-width: 900px;
-          margin: 0 auto;
-        }
-
-        .order-item-show-header {
-          margin-bottom: 32px;
-        }
-
-        .order-item-show-kicker {
-          font-size: 11px;
-          font-weight: 700;
-          color: var(--gold);
-          text-transform: uppercase;
-          letter-spacing: 0.36em;
-          margin-bottom: 12px;
-        }
-
-        .order-item-show-title {
-          font-size: clamp(28px, 4vw, 42px);
-          font-weight: 700;
-          line-height: 1.1;
-          margin: 0 0 8px;
-        }
-
-        .order-item-show-subtitle {
-          color: var(--text-muted);
-          font-size: 14px;
-          margin-top: 8px;
-        }
-
-        .order-item-show-card {
-          border: 1px solid var(--line);
-          border-radius: 24px;
-          padding: 32px;
-          background: var(--card-bg);
-          box-shadow: var(--shadow);
-          backdrop-filter: blur(4px);
-          margin-bottom: 24px;
-          animation: fade-up 560ms ease;
-        }
-
-        .order-item-pricing-card {
-          border: 1px solid rgba(226, 191, 102, 0.3);
-          border-radius: 20px;
-          padding: 28px;
-          background: rgba(226, 191, 102, 0.06);
-          margin-bottom: 24px;
-        }
-
-        html[data-admin-theme='light'] .order-item-pricing-card {
-          background: rgba(192, 139, 15, 0.04);
-          border-color: rgba(192, 139, 15, 0.2);
-        }
-
-        .order-item-show-section-title {
-          font-size: 14px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.18em;
-          color: var(--gold);
-          margin-bottom: 20px;
-          margin-top: 0;
-        }
-
-        .order-item-show-section {
-          margin-bottom: 28px;
-        }
-
-        .order-item-show-section:last-child {
-          margin-bottom: 0;
-        }
-
-        .order-item-pricing-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 14px 0;
-          border-bottom: 1px solid rgba(226, 191, 102, 0.15);
-        }
-
-        .order-item-pricing-row:last-child {
-          border-bottom: none;
-        }
-
-        .order-item-pricing-label {
-          color: var(--text-muted);
-          font-weight: 500;
-          font-size: 14px;
-        }
-
-        .order-item-pricing-value {
-          font-weight: 700;
-          font-size: 16px;
-          color: var(--text-main);
-        }
-
-        .order-item-pricing-value.total {
-          font-size: 24px;
-          color: var(--gold);
-        }
-
-        .order-item-pricing-value.savings {
-          color: #10b981;
-        }
-
-        .order-item-show-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-          gap: 16px;
-        }
-
-        .order-item-show-field {
-          padding: 16px;
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 12px;
-          border: 1px solid var(--line);
-        }
-
-        html[data-admin-theme='light'] .order-item-show-field {
-          background: rgba(15, 23, 42, 0.03);
-        }
-
-        .order-item-show-label {
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.18em;
-          color: var(--text-muted);
-          margin-bottom: 8px;
-          display: block;
-        }
-
-        .order-item-show-value {
-          font-size: 16px;
-          color: var(--text-main);
-          line-height: 1.6;
-          word-break: break-word;
-        }
-
-        .order-item-show-value.highlight {
-          color: var(--gold);
-          font-weight: 700;
-          font-size: 22px;
-        }
-
-        .order-item-show-value.large {
-          font-size: 20px;
-          font-weight: 600;
-        }
-
-        .order-item-divider {
-          height: 1px;
-          background: linear-gradient(90deg, rgba(226, 191, 102, 0), rgba(226, 191, 102, 0.28), rgba(226, 191, 102, 0));
-          margin: 24px 0;
-        }
-
-        .order-item-status-timeline {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 12px;
-        }
-
-        .order-item-timeline-item {
-          padding: 12px 16px;
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 8px;
-          border-left: 3px solid rgba(226, 191, 102, 0.3);
-          font-size: 13px;
-        }
-
-        .order-item-timeline-label {
-          color: var(--text-muted);
-          font-weight: 600;
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin-bottom: 6px;
-        }
-
-        .order-item-timeline-value {
-          color: var(--text-main);
-          font-weight: 500;
-          font-size: 13px;
-        }
-
-        .order-item-quantity-box {
-          background: rgba(226, 191, 102, 0.1);
-          border: 2px solid rgba(226, 191, 102, 0.3);
-          border-radius: 16px;
-          padding: 20px;
-          text-align: center;
-        }
-
-        html[data-admin-theme='light'] .order-item-quantity-box {
-          background: rgba(192, 139, 15, 0.06);
-          border-color: rgba(192, 139, 15, 0.2);
-        }
-
-        .order-item-quantity-number {
-          font-size: 48px;
-          font-weight: 700;
-          color: var(--gold);
-          line-height: 1;
-          margin: 0;
-        }
-
-        .order-item-quantity-label {
-          font-size: 12px;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin-top: 8px;
-          font-weight: 600;
-        }
-
-        @keyframes fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @media (max-width: 720px) {
-          .order-item-show-container {
-            padding: 20px 16px;
-          }
-
-          .order-item-show-card {
-            padding: 24px 20px;
-          }
-
-          .order-item-show-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .order-item-pricing-card {
-            padding: 20px;
-          }
-        }
-      `}</style>
-
-      <div className="order-item-show-inner">
-        <div className="order-item-show-header">
-          <div className="order-item-show-kicker">Order Item Details</div>
-          <h1 className="order-item-show-title">Item #{item.id || "—"}</h1>
-          <p className="order-item-show-subtitle">
-            Order ID: <strong>#{item.orderId || "—"}</strong> • Product:{" "}
-            <strong>{item.productId || "—"}</strong>
-          </p>
+      <div style={cardStyle}>
+        <div style={headerStyle}>
+          <div>
+            <h1 style={titleStyle}>{product?.name || "Order Item"}</h1>
+            <p style={subtitleStyle}>
+              Order #{order?.id || "-"} • Item #{details?.id || "-"}
+            </p>
+          </div>
+          <span style={badgeStyle}>Active Item</span>
         </div>
+      </div>
 
-        <div className="order-item-pricing-card">
-          <div
-            className="order-item-show-section-title"
-            style={{ marginBottom: "16px" }}
-          >
-            Pricing Breakdown
-          </div>
-
-          <div className="order-item-pricing-row">
-            <span className="order-item-pricing-label">Unit Price</span>
-            <span className="order-item-pricing-value">
-              {formatCurrency(unitPrice)}
-            </span>
-          </div>
-
-          <div className="order-item-pricing-row">
-            <span className="order-item-pricing-label">Quantity</span>
-            <span className="order-item-pricing-value">
-              {quantity} {quantity === 1 ? "item" : "items"}
-            </span>
-          </div>
-
-          <div className="order-item-pricing-row">
-            <span className="order-item-pricing-label">Subtotal</span>
-            <span className="order-item-pricing-value">
-              {formatCurrency(unitPrice * quantity)}
-            </span>
-          </div>
-
-          <div
-            className="order-item-pricing-row"
-            style={{
-              borderBottom: "2px solid rgba(226, 191, 102, 0.3)",
-              paddingTop: "16px",
-              paddingBottom: "16px",
-            }}
-          >
-            <span className="order-item-pricing-label">Total Price</span>
-            <span className="order-item-pricing-value total">
-              {formatCurrency(totalPrice)}
-            </span>
-          </div>
-
-          {savingsPerItem > 0 && (
-            <div
-              className="order-item-pricing-row"
-              style={{ borderBottom: "none", paddingTop: "12px" }}
-            >
-              <span className="order-item-pricing-label">Discount Applied</span>
-              <span className="order-item-pricing-value savings">
-                -{savingsPerItem}%
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="order-item-show-card">
-          <div className="order-item-show-section">
-            <h3 className="order-item-show-section-title">Item Information</h3>
-
-            <div className="order-item-show-grid">
-              <div className="order-item-show-field">
-                <label className="order-item-show-label">Item ID</label>
-                <div
-                  className="order-item-show-value highlight"
-                  style={{ fontSize: "20px" }}
-                >
-                  {item.id || "—"}
-                </div>
-              </div>
-
-              <div className="order-item-show-field">
-                <label className="order-item-show-label">Product ID</label>
-                <div className="order-item-show-value large">
-                  {item.productId || "—"}
-                </div>
-              </div>
-
-              <div className="order-item-show-field">
-                <label className="order-item-show-label">Order ID</label>
-                <div className="order-item-show-value large">
-                  {item.orderId || "—"}
-                </div>
-              </div>
-
-              <div className="order-item-show-field">
-                <label className="order-item-show-label">Unit Price</label>
-                <div className="order-item-show-value highlight">
-                  {formatCurrency(unitPrice)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="order-item-divider" />
-
-          <div className="order-item-show-section">
-            <h3 className="order-item-show-section-title">Quantity & Totals</h3>
-
+      <div className="change8-order-item-grid" style={gridStyle}>
+        <div style={cardStyle}>
+          {product?.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product?.name || "Product"}
+              style={imageStyle}
+            />
+          ) : (
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
+                ...imageStyle,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#94a3b8",
               }}
             >
-              <div className="order-item-quantity-box">
-                <p className="order-item-quantity-number">{quantity}</p>
-                <p className="order-item-quantity-label">Units Ordered</p>
-              </div>
+              No image available
+            </div>
+          )}
 
-              <div className="order-item-quantity-box">
-                <p
-                  style={{
-                    color: "var(--gold)",
-                    fontSize: "28px",
-                    fontWeight: "700",
-                    margin: "0 0 8px",
-                  }}
-                >
-                  {formatCurrency(totalPrice)}
-                </p>
-                <p className="order-item-quantity-label">Total Amount</p>
-              </div>
+          <div style={{ height: 14 }} />
+
+          <h2 style={sectionTitleStyle}>Product Snapshot</h2>
+          <div style={infoGridStyle}>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Product Name</span>
+              <strong>{product?.name || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>SKU</span>
+              <strong>{product?.sku || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Product ID</span>
+              <strong>#{product?.id || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Current Stock</span>
+              <strong>{product?.stock ?? "-"}</strong>
             </div>
           </div>
+        </div>
 
-          <div className="order-item-divider" />
-
-          <div className="order-item-show-section">
-            <h3 className="order-item-show-section-title">Timeline</h3>
-
-            <div className="order-item-status-timeline">
-              <div className="order-item-timeline-item">
-                <div className="order-item-timeline-label">Added</div>
-                <div className="order-item-timeline-value">
-                  {formatDate(item.createdAt)}
-                </div>
-              </div>
-
-              <div className="order-item-timeline-item">
-                <div className="order-item-timeline-label">Last Updated</div>
-                <div className="order-item-timeline-value">
-                  {formatDate(item.updatedAt)}
-                </div>
-              </div>
+        <div style={cardStyle}>
+          <h2 style={sectionTitleStyle}>Order & Customer</h2>
+          <div style={infoGridStyle}>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Customer</span>
+              <strong>{customer?.name || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Email</span>
+              <strong>{customer?.email || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Order ID</span>
+              <strong>#{order?.id || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Order Status</span>
+              <strong>{order?.status || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Payment Method</span>
+              <strong>{order?.paymentMethod || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Shipping Method</span>
+              <strong>{order?.shippingMethod || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Tracking Number</span>
+              <strong>{order?.trackingNumber || "-"}</strong>
+            </div>
+            <div style={infoRowStyle}>
+              <span style={{ color: "#94a3b8" }}>Created At</span>
+              <strong>{formatDate(details.createdAt)}</strong>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div style={cardStyle}>
+        <h2 style={sectionTitleStyle}>Pricing Details</h2>
+        <div style={infoGridStyle}>
+          <div style={infoRowStyle}>
+            <span style={{ color: "#94a3b8" }}>Quantity</span>
+            <strong>{details.quantity}</strong>
+          </div>
+          <div style={infoRowStyle}>
+            <span style={{ color: "#94a3b8" }}>Unit Price</span>
+            <strong>{formatMoney(details.unitPrice)}</strong>
+          </div>
+          <div style={infoRowStyle}>
+            <span style={{ color: "#94a3b8" }}>Line Total</span>
+            <strong>{formatMoney(calculatedTotal)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style={cardStyle}>
+        <h2 style={sectionTitleStyle}>Quick Summary</h2>
+        <div style={lineItemStyle}>
+          {product?.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product?.name || "Product"}
+              style={{
+                width: "84px",
+                height: "84px",
+                objectFit: "cover",
+                borderRadius: "12px",
+              }}
+            />
+          ) : (
+            <div style={emptyImageStyle}>No image</div>
+          )}
+          <div style={{ display: "grid", gap: "4px" }}>
+            <strong style={{ color: "#f8fafc", fontSize: "16px" }}>
+              {product?.name || "Unnamed product"}
+            </strong>
+            <span style={{ color: "#94a3b8", fontSize: "12px" }}>
+              SKU: {product?.sku || "-"}
+            </span>
+            <span style={{ color: "#cbd5e1", fontSize: "12px" }}>
+              Qty {details.quantity} x {formatMoney(details.unitPrice)}
+            </span>
+          </div>
+          <strong style={{ color: "#f8fafc", fontSize: "16px" }}>
+            {formatMoney(calculatedTotal)}
+          </strong>
+
         </div>
       </div>
     </div>
