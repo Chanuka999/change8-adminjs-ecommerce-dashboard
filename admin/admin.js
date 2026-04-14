@@ -192,8 +192,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=11.1"],
-    scripts: ["/custom/admin-theme.js?v=11.1"],
+    styles: ["/custom/admin-theme.css?v=11.2"],
+    scripts: ["/custom/admin-theme.js?v=12.0"],
   },
   dashboard: {
     component: Components.Dashboard,
