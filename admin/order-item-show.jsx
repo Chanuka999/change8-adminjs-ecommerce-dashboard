@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 
 const pageStyle = {
@@ -368,6 +369,7 @@ const OrderItemShow = ({ record }) => {
           <strong style={{ color: "#f8fafc", fontSize: "16px" }}>
             {formatMoney(calculatedTotal)}
           </strong>
+
         </div>
       </div>
     </div>

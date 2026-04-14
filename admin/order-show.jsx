@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 
 const pageStyle = {
@@ -289,9 +290,11 @@ const OrderShow = ({ record }) => {
               <div style={{ whiteSpace: "pre-wrap" }}>
                 {details?.shippingAddress || "-"}
               </div>
+
             </div>
           </div>
         </div>
+
 
         <div style={cardStyle}>
           <h2 style={sectionTitleStyle}>Order Summary / Totals</h2>
@@ -368,6 +371,7 @@ const OrderShow = ({ record }) => {
               </div>
             ))
           )}
+
         </div>
       </div>
     </div>

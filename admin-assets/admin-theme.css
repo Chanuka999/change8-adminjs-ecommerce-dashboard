@@ -262,6 +262,27 @@ html[data-admin-theme="light"] [class*="DropDownList"] * {
   border: 1px solid var(--admin-border) !important;
 }
 
+/* Remove the outer white card around table views */
+.adminjs_Main [data-css*="wrapper"],
+.adminjs_Main [data-css*="resource-list"],
+.adminjs_Main .adminjs_Section,
+.adminjs_Main .adminjs_Box {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.adminjs_Main main,
+.adminjs_Main main > div,
+.adminjs_Main main > div > div,
+.adminjs_Main main > div > div > div,
+.adminjs_Main section,
+.adminjs_Main article {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
 /* Fix: Reset internal boxes inside tables to prevent stretching and bubble look */
 .adminjs_Table .adminjs_Box,
 .adminjs_Table [class*="Box"] {
@@ -291,6 +312,27 @@ html[data-admin-theme="light"] [class*="DropDownList"] * {
   align-items: center !important;
   gap: 12px !important;
   white-space: nowrap !important;
+}
+
+.adminjs_Table table,
+.adminjs_Table thead,
+.adminjs_Table tbody,
+.adminjs_Table tr {
+  border: 0 !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.adminjs_Table thead tr,
+.adminjs_Table tbody tr {
+  box-shadow: none !important;
+}
+
+.adminjs_Table thead th,
+.adminjs_Table tbody td {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  background-image: none !important;
 }
 
 .adminjs_Table td a,
@@ -590,7 +632,6 @@ html[data-admin-theme="light"] [data-testid="dropdown-list"] {
 }
 
 .change8-theme-toggle {
-  z-index: 1000;
   border: 1px solid var(--admin-border);
   background: var(--admin-surface-2);
   color: var(--admin-text);
@@ -605,10 +646,12 @@ html[data-admin-theme="light"] [data-testid="dropdown-list"] {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-right: 15px;
+  margin-right: 12px;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   outline: none !important;
+  position: static !important;
+  flex: 0 0 auto !important;
 }
 
 .change8-theme-toggle:hover {
