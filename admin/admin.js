@@ -2,6 +2,7 @@ import AdminJS, { ComponentLoader } from "adminjs";
 import AdminJSExpress from "@adminjs/express";
 import AdminJSSequelize from "@adminjs/sequelize";
 import { Op } from "sequelize";
+import bcrypt from "bcrypt";
 import { fileURLToPath } from "url";
 import path from "path";
 
@@ -80,14 +81,6 @@ const Components = {
   CategoryShow: componentLoader.add(
     "CategoryShow",
     path.join(__dirname, "category-show.jsx"),
-  ),
-  OrderShow: componentLoader.add(
-    "OrderShow",
-    path.join(__dirname, "order-show.jsx"),
-  ),
-  OrderItemShow: componentLoader.add(
-    "OrderItemShow",
-    path.join(__dirname, "order-item-show.jsx"),
   ),
 };
 
@@ -199,8 +192,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=10.2"],
-    scripts: ["/custom/admin-theme.js?v=10.2"],
+    styles: ["/custom/admin-theme.css?v=11.1"],
+    scripts: ["/custom/admin-theme.js?v=11.1"],
   },
   dashboard: {
     component: Components.Dashboard,
@@ -281,6 +274,9 @@ const admin = new AdminJS({
       options: {
         navigation: shopNavigation,
         actions: {
+          new: {
+            component: Components.OrderCreate,
+          },
           show: {
             component: Components.OrderShow,
           },
@@ -311,12 +307,37 @@ if (process.env.NODE_ENV !== "production") {
 
 const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   authenticate: async (email, password) => {
-    const user = await User.findOne({ where: { email } });
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
+    const rawPassword = String(password || "");
 
-    if (user && (user.role === "admin" || user.role === "user")) {
-      return user;
+    if (!normalizedEmail || !rawPassword) {
+      return null;
     }
-    return null;
+
+    const user = await User.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("email")),
+        normalizedEmail,
+      ),
+    });
+
+    if (!user || !(user.role === "admin" || user.role === "user")) {
+      return null;
+    }
+
+    // Accept bcrypt hashed passwords and legacy plain-text values.
+    const isBcryptMatch = await bcrypt
+      .compare(rawPassword, user.password)
+      .catch(() => false);
+    const isLegacyPlainMatch = user.password === rawPassword;
+
+    if (!isBcryptMatch && !isLegacyPlainMatch) {
+      return null;
+    }
+
+    return user;
   },
   cookieName: "adminjs",
   cookiePassword: "secretcookie",
@@ -454,6 +475,8 @@ router.post("/context/order-create/submit", async (req, res) => {
         paymentMethod: payload.paymentMethod || null,
         paymentStatus: payload.paymentStatus || "pending",
         transactionId: payload.transactionId || null,
+        shippingName: payload.shippingName || null,
+        shippingPhone: payload.shippingPhone || null,
         shippingMethod: payload.shippingMethod || null,
         trackingNumber: payload.trackingNumber || null,
         subtotal: payload.subtotal ?? 0,
@@ -475,6 +498,7 @@ router.post("/context/order-create/submit", async (req, res) => {
         return {
           orderId: order.id,
           productId: Number(item.productId || 0),
+          size: item.size ? String(item.size).trim() : null,
           quantity,
           unitPrice,
           totalPrice,

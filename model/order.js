@@ -28,6 +28,14 @@ const Order = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    shippingName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shippingPhone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     paymentMethod: {
       type: DataTypes.STRING,
       allowNull: true,

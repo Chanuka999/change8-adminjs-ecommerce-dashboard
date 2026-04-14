@@ -231,7 +231,21 @@ app.get("/admin/register", (req, res) => {
         <div id="error" class="error-message"></div>
         <div id="success" class="success-message"></div>
 
-        <form id="registerForm">
+        <form id="registerForm" autocomplete="off">
+          <input
+            type="text"
+            name="fake_username"
+            autocomplete="username"
+            style="display: none"
+            tabindex="-1"
+          />
+          <input
+            type="password"
+            name="fake_password"
+            autocomplete="current-password"
+            style="display: none"
+            tabindex="-1"
+          />
           <div class="form-group">
             <label for="name">Full Name</label>
             <input
@@ -239,6 +253,7 @@ app.get("/admin/register", (req, res) => {
               id="name"
               name="name"
               placeholder="Enter your full name"
+              autocomplete="off"
               required
             />
           </div>
@@ -249,6 +264,9 @@ app.get("/admin/register", (req, res) => {
               id="email"
               name="email"
               placeholder="example@email.com"
+              autocomplete="off"
+              autocapitalize="none"
+              spellcheck="false"
               required
             />
           </div>
@@ -259,6 +277,7 @@ app.get("/admin/register", (req, res) => {
               id="password"
               name="password"
               placeholder="At least 6 characters"
+              autocomplete="new-password"
               minlength="6"
               required
             />
@@ -279,6 +298,20 @@ app.get("/admin/register", (req, res) => {
       const submitBtn = document.getElementById("submitBtn");
       const errorDiv = document.getElementById("error");
       const successDiv = document.getElementById("success");
+
+      const clearRegisterInputs = () => {
+        ["name", "email", "password"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = "";
+          }
+        });
+      };
+
+      window.addEventListener("pageshow", () => {
+        clearRegisterInputs();
+        setTimeout(clearRegisterInputs, 80);
+      });
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();

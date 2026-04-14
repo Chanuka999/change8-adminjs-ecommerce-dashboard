@@ -1,28 +1,30 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
 
 :root {
-  --admin-bg: #081225;
-  --admin-surface: #0f1c34;
-  --admin-surface-2: #122444;
-  --admin-sidebar: #0b1730;
-  --admin-topbar: rgba(11, 23, 48, 0.85);
-  --admin-text: #e8edf8;
-  --admin-muted: #9aa8c1;
-  --admin-border: rgba(226, 191, 102, 0.15);
-  --admin-accent: #e2bf66;
+  --admin-bg: #18181b;
+  --admin-surface: #27272a;
+  --admin-surface-2: #3f3f46;
+  --admin-sidebar: #18181b;
+  --admin-topbar: rgba(24, 24, 27, 0.92);
+  --admin-text: #f4f4f5;
+  --admin-muted: #a1a1aa;
+  --admin-border: rgba(244, 244, 245, 0.12);
+  --admin-brand: #f472b6;
+  --admin-accent: #a78bfa;
   --admin-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 }
 
 html[data-admin-theme="light"] {
-  --admin-bg: #f2f7ff;
+  --admin-bg: #fafafa;
   --admin-surface: #ffffff;
-  --admin-surface-2: #f8fbff;
-  --admin-sidebar: #f8fbff;
+  --admin-surface-2: #f4f4f5;
+  --admin-sidebar: #ffffff;
   --admin-topbar: #ffffff;
-  --admin-text: #0f172a;
-  --admin-muted: #475569;
-  --admin-border: rgba(15, 23, 42, 0.12);
-  --admin-accent: #c08b0f;
+  --admin-text: #27272a;
+  --admin-muted: #52525b;
+  --admin-border: rgba(39, 39, 42, 0.12);
+  --admin-brand: #ec4899;
+  --admin-accent: #8b5cf6;
 }
 
 html,
@@ -35,6 +37,58 @@ body,
   background: var(--admin-bg) !important;
   background-color: var(--admin-bg) !important;
   font-family: var(--admin-font) !important;
+}
+
+/* Login page background image */
+html.change8-login-page,
+html.change8-login-page body,
+html.change8-login-page #app,
+html.change8-login-page .adminjs_Layout,
+html.change8-login-page [class*="adminjs_Layout"],
+html.change8-login-page [data-testid="layout"],
+html.change8-login-page [data-css="layout"],
+html.change8-login-page main,
+html.change8-login-page [data-css*="login"],
+html.change8-login-page [class*="Login"] {
+  background-image:
+    linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
+    url("/public/img1.jpg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  background-color: transparent !important;
+}
+
+html.change8-login-page body {
+  position: relative !important;
+  background: transparent !important;
+}
+
+html.change8-login-page body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
+    url("/public/img1.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+html.change8-login-page .adminjs_Box,
+html.change8-login-page [data-css*="login"],
+html.change8-login-page [class*="Login"] {
+  background: rgba(10, 22, 44, 0.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+html.change8-login-page [data-testid="layout"] > *,
+html.change8-login-page .adminjs_Layout > * {
+  background: transparent !important;
 }
 
 .adminjs_Sidebar,
@@ -58,6 +112,12 @@ nav,
   background: var(--admin-sidebar) !important;
   background-color: var(--admin-sidebar) !important;
   border-color: var(--admin-border) !important;
+}
+
+.adminjs_Brand a,
+.adminjs_Brand h1,
+.adminjs_Brand span {
+  color: var(--admin-brand) !important;
 }
 
 .adminjs_TopBar,
@@ -142,6 +202,18 @@ header,
 
 /* Strong profile text contrast overrides */
 [data-testid="topbar"] [data-testid="currentUser"],
+[data-testid="topbar"] [data-css*="current-user"],
+[data-testid="topbar"] [data-css*="currentUser"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 6px 10px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-testid="topbar"] [data-testid="currentUser"],
 [data-testid="topbar"] [data-testid="currentUser"] *,
 [data-testid="topbar"] [data-css*="current-user"],
 [data-testid="topbar"] [data-css*="current-user"] *,
@@ -150,6 +222,62 @@ header,
   color: #f8fafc !important;
   fill: #f8fafc !important;
   opacity: 1 !important;
+}
+
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"],
+html[data-admin-theme="dark"] [data-testid="topbar"] [data-css*="current-user"],
+html[data-admin-theme="dark"] [data-testid="topbar"] [data-css*="currentUser"] {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"]
+  *,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="current-user"]
+  *,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="currentUser"]
+  * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"]
+  a,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="current-user"]
+  a,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="currentUser"]
+  a,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-testid="currentUser"]
+  button,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="current-user"]
+  button,
+html[data-admin-theme="dark"]
+  [data-testid="topbar"]
+  [data-css*="currentUser"]
+  button {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 html[data-admin-theme="light"]
@@ -198,6 +326,19 @@ html[data-admin-theme="light"]
 [class*="DropDownItem"] {
   background: #122444 !important;
   color: #f8fafc !important;
+}
+
+html[data-admin-theme="dark"] [role="menuitem"],
+html[data-admin-theme="dark"] [data-testid="dropdown-item"],
+html[data-admin-theme="dark"] [class*="DropDownItem"] {
+  background: #1f2937 !important;
+  color: #ffffff !important;
+}
+
+html[data-admin-theme="dark"] [role="menuitem"]:hover,
+html[data-admin-theme="dark"] [data-testid="dropdown-item"]:hover,
+html[data-admin-theme="dark"] [class*="DropDownItem"]:hover {
+  background: rgba(139, 92, 246, 0.2) !important;
 }
 
 [role="menuitem"]:hover,
@@ -365,6 +506,11 @@ html[data-admin-theme="light"] [class*="DropDownList"] * {
   align-items: center !important;
   gap: 15px !important;
   background: transparent !important;
+}
+
+[data-testid="topbar"] [data-testid="currentUser"] {
+  order: -1 !important;
+  margin-right: auto !important;
 }
 
 /* Specifically force transparency on very outer content wrappers to let surface show */

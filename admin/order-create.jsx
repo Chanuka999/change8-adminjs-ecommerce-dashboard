@@ -63,6 +63,8 @@ const labelStyle = {
 
 const inputStyle = {
   width: "100%",
+  minWidth: 0,
+  boxSizing: "border-box",
   borderRadius: "12px",
   border: "1px solid rgba(148, 163, 184, 0.26)",
   background: "rgba(15, 23, 42, 0.62)",
@@ -75,12 +77,14 @@ const inputStyle = {
 const rowStyle = {
   display: "grid",
   gap: "8px",
+  minWidth: 0,
 };
 
 const grid2Style = {
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: "10px",
+  alignItems: "start",
 };
 
 const customerInfoStyle = {
@@ -201,15 +205,83 @@ const mapLinkStyle = {
   textDecoration: "none",
 };
 
+const paymentOptionGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "10px",
+};
+
+const paymentOptionStyle = (active) => ({
+  borderRadius: "12px",
+  border: active
+    ? "1px solid rgba(99, 102, 241, 0.9)"
+    : "1px solid rgba(148, 163, 184, 0.24)",
+  background: active ? "rgba(99, 102, 241, 0.22)" : "rgba(15, 23, 42, 0.48)",
+  color: "#f8fafc",
+  padding: "10px 12px",
+  cursor: "pointer",
+  textAlign: "left",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  fontWeight: 700,
+});
+
+const securityChipWrapStyle = {
+  marginTop: "12px",
+  display: "grid",
+  gap: "8px",
+};
+
+const securityChipStyle = {
+  border: "1px solid rgba(34, 197, 94, 0.42)",
+  borderRadius: "999px",
+  background: "rgba(20, 83, 45, 0.24)",
+  color: "#86efac",
+  padding: "7px 10px",
+  fontSize: "12px",
+  fontWeight: 700,
+  letterSpacing: "0.03em",
+};
+
 const responsiveCss = `
+.change8-order-grid-2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.change8-order-grid-2 > * {
+  min-width: 0 !important;
+}
+
+.change8-order-grid-2 input,
+.change8-order-grid-2 select,
+.change8-order-grid-2 textarea {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
 @media (max-width: 1024px) {
   .change8-order-layout {
     grid-template-columns: 1fr !important;
   }
 }
+
+@media (max-width: 760px) {
+  .change8-order-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
 `;
 
-const paymentOptions = ["Card", "Cash on Delivery", "Bank Transfer", "Wallet"];
+const paymentOptions = [
+  { value: "Card", label: "Card Payment", icon: "💳" },
+  { value: "Cash on Delivery", label: "Cash on Delivery", icon: "📦" },
+];
+
+const itemSizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
 const shippingMethods = [
   "PickMe Flash",
   "Pronto",
@@ -231,6 +303,7 @@ const formatMoney = (value) => {
 
 const createEmptyItem = () => ({
   productId: "",
+  size: "M",
   quantity: 1,
   unitPrice: 0,
 });
@@ -249,6 +322,8 @@ const OrderCreate = () => {
     paymentMethod: "Card",
     paymentStatus: "pending",
     transactionId: "",
+    shippingName: "",
+    shippingPhone: "",
     shippingAddress: "",
     shippingMethod: "PickMe Flash",
     trackingNumber: "",
@@ -297,6 +372,7 @@ const OrderCreate = () => {
           setLineItems([
             {
               productId: String(contextData.selectedProduct.id),
+              size: "M",
               quantity: 1,
               unitPrice: toNumber(contextData.selectedProduct.price),
             },
@@ -314,6 +390,7 @@ const OrderCreate = () => {
           setLineItems([
             {
               productId: String(preProductId),
+              size: "M",
               quantity: 1,
               unitPrice: toNumber(selected?.price),
             },
@@ -338,6 +415,22 @@ const OrderCreate = () => {
 
     return Number(orderCountByUser[String(selectedCustomer.id)] || 0);
   }, [orderCountByUser, selectedCustomer]);
+
+  useEffect(() => {
+    if (!selectedCustomer) {
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      shippingName: prev.shippingName || selectedCustomer.name || "",
+      shippingPhone:
+        prev.shippingPhone ||
+        selectedCustomer.phone ||
+        selectedCustomer.mobile ||
+        "",
+    }));
+  }, [selectedCustomer]);
 
   const lineTotals = useMemo(() => {
     const subtotal = lineItems.reduce((sum, item) => {
@@ -366,6 +459,8 @@ const OrderCreate = () => {
         item.productId = value;
         const product = products.find((p) => String(p.id) === String(value));
         item.unitPrice = toNumber(product?.price);
+      } else if (key === "size") {
+        item.size = value;
       } else if (key === "quantity") {
         item.quantity = Math.max(1, toNumber(value));
       } else if (key === "unitPrice") {
@@ -425,6 +520,8 @@ const OrderCreate = () => {
         paymentMethod: formData.paymentMethod,
         paymentStatus: formData.paymentStatus,
         transactionId: formData.transactionId || null,
+        shippingName: formData.shippingName || null,
+        shippingPhone: formData.shippingPhone || null,
         shippingMethod: formData.shippingMethod,
         trackingNumber: formData.trackingNumber || null,
         subtotal: lineTotals.subtotal.toFixed(2),
@@ -435,6 +532,7 @@ const OrderCreate = () => {
         shippingAddress: formData.shippingAddress || null,
         lineItems: validItems.map((item) => ({
           productId: Number(item.productId),
+          size: item.size || null,
           quantity: Math.max(1, toNumber(item.quantity)),
           unitPrice: Math.max(0, toNumber(item.unitPrice)).toFixed(2),
         })),
@@ -540,21 +638,42 @@ const OrderCreate = () => {
             <div style={cardStyle}>
               <h2 style={sectionTitleStyle}>Payment & Billing</h2>
 
-              <div style={grid2Style}>
+              <div style={rowStyle}>
+                <label style={labelStyle}>Payment Options</label>
+                <div style={paymentOptionGridStyle}>
+                  {paymentOptions.map((option) => {
+                    const active = formData.paymentMethod === option.value;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        style={paymentOptionStyle(active)}
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            paymentMethod: option.value,
+                          }))
+                        }
+                      >
+                        <span>{option.icon}</span>
+                        <span>{option.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ height: 10 }} />
+
+              <div className="change8-order-grid-2" style={grid2Style}>
                 <div style={rowStyle}>
-                  <label style={labelStyle}>Payment Method</label>
-                  <select
-                    name="paymentMethod"
+                  <label style={labelStyle}>Selected Method</label>
+                  <input
                     value={formData.paymentMethod}
-                    onChange={handleFormChange}
                     style={inputStyle}
-                  >
-                    {paymentOptions.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
+                    readOnly
+                  />
                 </div>
 
                 <div style={rowStyle}>
@@ -686,10 +805,34 @@ const OrderCreate = () => {
                               ? `${selectedProduct.sku} / #${selectedProduct.id}`
                               : "-"}
                           </span>
+                          <span style={{ fontSize: "12px", color: "#cbd5e1" }}>
+                            Size: {item.size || "-"} | Qty: {item.quantity}
+                          </span>
                         </div>
                       </div>
 
-                      <div style={grid2Style}>
+                      <div style={rowStyle}>
+                        <label style={labelStyle}>Size</label>
+                        <select
+                          value={item.size || "M"}
+                          onChange={(event) =>
+                            handleLineItemChange(
+                              index,
+                              "size",
+                              event.target.value,
+                            )
+                          }
+                          style={inputStyle}
+                        >
+                          {itemSizeOptions.map((sizeOption) => (
+                            <option key={sizeOption} value={sizeOption}>
+                              {sizeOption}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="change8-order-grid-2" style={grid2Style}>
                         <div style={rowStyle}>
                           <label style={labelStyle}>Quantity</label>
                           <input
@@ -748,8 +891,35 @@ const OrderCreate = () => {
             <div style={cardStyle}>
               <h2 style={sectionTitleStyle}>Shipping & Tracking</h2>
 
+              <div className="change8-order-grid-2" style={grid2Style}>
+                <div style={rowStyle}>
+                  <label style={labelStyle}>Shipping Contact Name *</label>
+                  <input
+                    name="shippingName"
+                    value={formData.shippingName}
+                    onChange={handleFormChange}
+                    style={inputStyle}
+                    placeholder="Receiver full name"
+                    required
+                  />
+                </div>
+                <div style={rowStyle}>
+                  <label style={labelStyle}>Shipping Phone Number *</label>
+                  <input
+                    name="shippingPhone"
+                    value={formData.shippingPhone}
+                    onChange={handleFormChange}
+                    style={inputStyle}
+                    placeholder="07X XXX XXXX"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ height: 10 }} />
+
               <div style={rowStyle}>
-                <label style={labelStyle}>Shipping Address</label>
+                <label style={labelStyle}>Shipping Address *</label>
                 <textarea
                   name="shippingAddress"
                   value={formData.shippingAddress}
@@ -760,6 +930,7 @@ const OrderCreate = () => {
                     resize: "vertical",
                   }}
                   placeholder="House number, street, city, postal code"
+                  required
                 />
                 {mapsHref ? (
                   <a
@@ -775,7 +946,7 @@ const OrderCreate = () => {
 
               <div style={{ height: 10 }} />
 
-              <div style={grid2Style}>
+              <div className="change8-order-grid-2" style={grid2Style}>
                 <div style={rowStyle}>
                   <label style={labelStyle}>Shipping Method</label>
                   <select
@@ -807,7 +978,7 @@ const OrderCreate = () => {
             <div style={cardStyle}>
               <h2 style={sectionTitleStyle}>Order Summary / Totals</h2>
 
-              <div style={grid2Style}>
+              <div className="change8-order-grid-2" style={grid2Style}>
                 <div style={rowStyle}>
                   <label style={labelStyle}>Shipping Fee</label>
                   <input
@@ -870,6 +1041,12 @@ const OrderCreate = () => {
               <div style={totalStyle}>
                 <span>Grand Total</span>
                 <span>{formatMoney(lineTotals.grandTotal)}</span>
+              </div>
+
+              <div style={securityChipWrapStyle}>
+                <div style={securityChipStyle}>Secure Payment Protected</div>
+                <div style={securityChipStyle}>Encrypted Checkout Channel</div>
+                <div style={securityChipStyle}>Trusted Delivery Tracking</div>
               </div>
             </div>
           </div>
