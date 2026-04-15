@@ -21,6 +21,8 @@
   --admin-brand: #7da0ff;
   --admin-accent: #b6a0ff;
   --admin-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --login-bg-image: url("/public/img1.jpg");
+  --login-bg-overlay: rgba(8, 18, 37, 0.32);
 }
 
 html[data-admin-theme="light"] {
@@ -56,12 +58,10 @@ html.change8-login-page .adminjs_Layout,
 html.change8-login-page [class*="adminjs_Layout"],
 html.change8-login-page [data-testid="layout"],
 html.change8-login-page [data-css="layout"],
-html.change8-login-page main,
-html.change8-login-page [data-css*="login"],
-html.change8-login-page [class*="Login"] {
+html.change8-login-page main {
   background-image:
-    linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
-    url("/public/img1.jpg") !important;
+    linear-gradient(var(--login-bg-overlay), var(--login-bg-overlay)),
+    var(--login-bg-image) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -78,10 +78,11 @@ html.change8-login-page body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
-    url("/public/img1.jpg");
+    linear-gradient(var(--login-bg-overlay), var(--login-bg-overlay)),
+    var(--login-bg-image);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -90,9 +91,17 @@ html.change8-login-page body::before {
 html.change8-login-page .adminjs_Box,
 html.change8-login-page [data-css*="login"],
 html.change8-login-page [class*="Login"] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.change8-login-page form[action*="login"] {
   background: rgba(10, 22, 44, 0.78) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  border-radius: 14px !important;
+  padding: 20px !important;
 }
 
 html.change8-login-page [data-testid="layout"] > *,
@@ -100,12 +109,25 @@ html.change8-login-page .adminjs_Layout > * {
   background: transparent !important;
 }
 
+html.change8-login-page #app,
+html.change8-login-page #app > div,
+html.change8-login-page #app > div > div,
+html.change8-login-page [data-testid="layout"],
+html.change8-login-page [data-testid="layout"] > div,
+html.change8-login-page [data-css="layout"],
+html.change8-login-page [data-css="layout"] > div {
+  position: relative !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* Fallback: apply background even if the html class is not set yet */
 body:has(form[action*="login"]),
 body:has(input[type="password"]) {
   background-image:
-    linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
-    url("/public/img1.jpg") !important;
+    linear-gradient(var(--login-bg-overlay), var(--login-bg-overlay)),
+    var(--login-bg-image) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;

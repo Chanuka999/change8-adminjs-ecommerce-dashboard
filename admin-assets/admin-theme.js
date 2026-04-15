@@ -73,8 +73,13 @@
       return;
     }
 
+    const overlay = "rgba(8, 18, 37, 0.32)";
     const bgImage =
-      'linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)), url("' +
+      "linear-gradient(" +
+      overlay +
+      ", " +
+      overlay +
+      '), url("' +
       window.location.origin +
       '/public/img1.jpg")';
 
@@ -139,10 +144,10 @@
         content: "" !important;
         position: fixed !important;
         inset: 0 !important;
-        z-index: -1 !important;
+        z-index: 0 !important;
         pointer-events: none !important;
         background-image:
-          linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)),
+          linear-gradient(rgba(8, 18, 37, 0.32), rgba(8, 18, 37, 0.32)),
           url("${window.location.origin}/public/img1.jpg") !important;
         background-size: cover !important;
         background-position: center !important;
@@ -178,10 +183,20 @@
       html.change8-login-page [data-css*="login"],
       html.change8-login-page [class*="Login"] {
         position: relative !important;
+        z-index: 1 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+
+      html.change8-login-page form[action*="login"] {
+        position: relative !important;
         z-index: 2 !important;
         background: rgba(10, 22, 44, 0.78) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(148, 163, 184, 0.25) !important;
+        border-radius: 14px !important;
+        padding: 20px !important;
       }
 
       html.change8-login-page [class*="Layout"] > *,
@@ -327,10 +342,45 @@
         node.style.removeProperty("padding");
         node.style.removeProperty("margin");
         node.style.setProperty("opacity", "1", "important");
+
+        // Keep wrappers transparent so the login background image remains visible.
+        if (node !== loginForm) {
+          node.style.setProperty("background", "transparent", "important");
+          node.style.setProperty(
+            "background-color",
+            "transparent",
+            "important",
+          );
+          node.style.setProperty("box-shadow", "none", "important");
+        }
+
         node = node.parentElement;
         depth += 1;
       }
     });
+
+    if (loginForm) {
+      loginForm.style.setProperty(
+        "background",
+        "rgba(10, 22, 44, 0.78)",
+        "important",
+      );
+      loginForm.style.setProperty("backdrop-filter", "blur(10px)", "important");
+      loginForm.style.setProperty(
+        "-webkit-backdrop-filter",
+        "blur(10px)",
+        "important",
+      );
+      loginForm.style.setProperty(
+        "border",
+        "1px solid rgba(148, 163, 184, 0.25)",
+        "important",
+      );
+      loginForm.style.setProperty("border-radius", "14px", "important");
+      loginForm.style.setProperty("padding", "20px", "important");
+      loginForm.style.setProperty("position", "relative", "important");
+      loginForm.style.setProperty("z-index", "2", "important");
+    }
   };
 
   const mountLoginBackgroundLayer = () => {
@@ -347,7 +397,7 @@
       layer.style.zIndex = "0";
       layer.style.pointerEvents = "none";
       layer.style.backgroundImage =
-        'linear-gradient(rgba(8, 18, 37, 0.66), rgba(8, 18, 37, 0.66)), url("' +
+        'linear-gradient(rgba(8, 18, 37, 0.32), rgba(8, 18, 37, 0.32)), url("' +
         window.location.origin +
         '/public/img1.jpg")';
       layer.style.backgroundSize = "cover";
@@ -374,6 +424,7 @@
         applyLoginBackground();
         ensureLoginBackgroundStyle();
         mountLoginBackgroundLayer();
+        hideLoginWelcomePanel();
         ensureLoginFormVisible();
         mountRegisterLinkOnLogin();
       };
