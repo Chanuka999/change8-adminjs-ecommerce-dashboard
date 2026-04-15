@@ -35,6 +35,52 @@ const shopNavigation = {
   icon: "Store",
 };
 
+const slugify = (value) => {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+const sanitizeProductPayload = (request) => {
+  if (request?.method !== "post") {
+    return request;
+  }
+
+  const payload = { ...(request.payload || {}) };
+
+  const categoryId = Number(payload.categoryId);
+  if (!Number.isFinite(categoryId) || categoryId <= 0) {
+    throw new Error("Category is required for product");
+  }
+
+  payload.categoryId = categoryId;
+
+  if (payload.price === "") {
+    payload.price = 0;
+  }
+
+  if (payload.stock === "") {
+    payload.stock = 0;
+  }
+
+  if (payload.imageUrl === "") {
+    payload.imageUrl = null;
+  }
+
+  if (payload.imagePublicId === "") {
+    payload.imagePublicId = null;
+  }
+
+  if (payload.uploadImage === "") {
+    delete payload.uploadImage;
+  }
+
+  request.payload = payload;
+  return request;
+};
+
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
@@ -82,6 +128,7 @@ const Components = {
     "CategoryShow",
     path.join(__dirname, "category-show.jsx"),
   ),
+  About: componentLoader.add("About", path.join(__dirname, "about.jsx")),
 };
 
 const productResource = {
@@ -96,8 +143,8 @@ const productResource = {
         isAccessible: () => true,
         component: Components.ProductShow,
       },
-      new: { isAccessible: isAdmin },
-      edit: { isAccessible: isAdmin },
+      new: { isAccessible: isAdmin, before: sanitizeProductPayload },
+      edit: { isAccessible: isAdmin, before: sanitizeProductPayload },
       delete: { isAccessible: isAdmin },
       bulkDelete: { isAccessible: isAdmin },
     },
@@ -135,6 +182,10 @@ const productResource = {
     ],
     filterProperties: ["name", "categoryId", "isActive", "stock", "price"],
     properties: {
+      categoryId: {
+        reference: "Categories",
+        isRequired: true,
+      },
       uploadImage: {
         type: "string",
         isVisible: {
@@ -192,8 +243,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=11.5"],
-    scripts: ["/custom/admin-theme.js?v=12.5"],
+    styles: ["/custom/admin-theme.css?v=11.14"],
+    scripts: ["/custom/admin-theme.js?v=13.5"],
   },
   dashboard: {
     component: Components.Dashboard,
@@ -248,6 +299,12 @@ const admin = new AdminJS({
       };
     },
   },
+  pages: {
+    About: {
+      label: "About",
+      component: Components.About,
+    },
+  },
   resources: [
     {
       resource: User,
@@ -261,8 +318,34 @@ const admin = new AdminJS({
           show: {
             component: Components.CategoryShow,
           },
-          new: { isAccessible: isAdmin },
-          edit: { isAccessible: isAdmin },
+          new: {
+            isAccessible: isAdmin,
+            before: async (request) => {
+              if (request?.method === "post") {
+                const payload = { ...(request.payload || {}) };
+                if (!payload.slug && payload.name) {
+                  payload.slug = slugify(payload.name);
+                }
+                request.payload = payload;
+              }
+
+              return request;
+            },
+          },
+          edit: {
+            isAccessible: isAdmin,
+            before: async (request) => {
+              if (request?.method === "post") {
+                const payload = { ...(request.payload || {}) };
+                if (!payload.slug && payload.name) {
+                  payload.slug = slugify(payload.name);
+                }
+                request.payload = payload;
+              }
+
+              return request;
+            },
+          },
           delete: { isAccessible: isAdmin },
           bulkDelete: { isAccessible: isAdmin },
         },
@@ -341,6 +424,43 @@ const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   },
   cookieName: "adminjs",
   cookiePassword: "secretcookie",
+});
+
+router.get("/context/current-user", async (req, res) => {
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "name", "email", "role"],
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    return res.json({
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email,
+      role: currentUser.role,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 });
 
 router.get("/context/order-create", async (req, res) => {

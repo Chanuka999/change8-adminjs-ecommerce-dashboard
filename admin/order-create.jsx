@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 const pageStyle = {
   display: "grid",
   gap: "20px",
-  color: "#e2e8f0",
+  color: "#111827",
+  background: "#ffffff",
 };
 
 const headerStyle = {
@@ -15,21 +16,20 @@ const titleStyle = {
   margin: 0,
   fontSize: "34px",
   lineHeight: 1.08,
-  color: "#f8fafc",
+  color: "#111827",
 };
 
 const descStyle = {
   margin: 0,
-  color: "#94a3b8",
+  color: "#64748b",
   fontSize: "14px",
 };
 
 const cardStyle = {
   borderRadius: "18px",
-  border: "1px solid rgba(148, 163, 184, 0.2)",
-  background:
-    "linear-gradient(150deg, rgba(10, 23, 48, 0.94) 0%, rgba(8, 18, 38, 0.94) 100%)",
-  boxShadow: "0 14px 28px rgba(2, 6, 23, 0.22)",
+  border: "1px solid rgba(17, 24, 39, 0.08)",
+  background: "#ffffff",
+  boxShadow: "0 14px 28px rgba(15, 23, 42, 0.08)",
   padding: "18px",
 };
 
@@ -38,7 +38,7 @@ const sectionTitleStyle = {
   fontSize: "13px",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "#f5df90",
+  color: "#111827",
   fontWeight: 800,
 };
 
@@ -58,7 +58,7 @@ const labelStyle = {
   fontWeight: 700,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
-  color: "#cbd5e1",
+  color: "#475569",
 };
 
 const inputStyle = {
@@ -66,9 +66,9 @@ const inputStyle = {
   minWidth: 0,
   boxSizing: "border-box",
   borderRadius: "12px",
-  border: "1px solid rgba(148, 163, 184, 0.26)",
-  background: "rgba(15, 23, 42, 0.62)",
-  color: "#f8fafc",
+  border: "1px solid rgba(17, 24, 39, 0.12)",
+  background: "#ffffff",
+  color: "#111827",
   padding: "11px 13px",
   fontSize: "14px",
   fontFamily: "inherit",
@@ -98,26 +98,26 @@ const customerRowStyle = {
   gap: "10px",
   fontSize: "13px",
   paddingBottom: "8px",
-  borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+  borderBottom: "1px solid rgba(17, 24, 39, 0.08)",
 };
 
 const mutedStyle = {
-  color: "#94a3b8",
+  color: "#64748b",
 };
 
 const strongStyle = {
-  color: "#f8fafc",
+  color: "#111827",
   fontWeight: 700,
   textAlign: "right",
 };
 
 const lineItemRowStyle = {
-  border: "1px solid rgba(148, 163, 184, 0.2)",
+  border: "1px solid rgba(17, 24, 39, 0.12)",
   borderRadius: "14px",
   padding: "12px",
   display: "grid",
   gap: "12px",
-  background: "rgba(15, 23, 42, 0.44)",
+  background: "#f8fafc",
 };
 
 const lineItemTopStyle = {
@@ -139,26 +139,26 @@ const imageStyle = {
   height: "56px",
   borderRadius: "10px",
   objectFit: "cover",
-  background: "#0f172a",
-  border: "1px solid rgba(148, 163, 184, 0.25)",
+  background: "#e5e7eb",
+  border: "1px solid rgba(17, 24, 39, 0.12)",
 };
 
 const addButtonStyle = {
-  border: "1px solid rgba(148, 163, 184, 0.35)",
+  border: "1px solid rgba(99, 102, 241, 0.35)",
   borderRadius: "10px",
   padding: "9px 12px",
-  background: "rgba(99, 102, 241, 0.18)",
-  color: "#dbeafe",
+  background: "#eef2ff",
+  color: "#3730a3",
   cursor: "pointer",
   fontWeight: 700,
 };
 
 const removeButtonStyle = {
-  border: "1px solid rgba(239, 68, 68, 0.5)",
+  border: "1px solid #fca5a5",
   borderRadius: "10px",
   padding: "8px 10px",
-  background: "rgba(127, 29, 29, 0.25)",
-  color: "#fecaca",
+  background: "#fee2e2",
+  color: "#991b1b",
   cursor: "pointer",
   fontSize: "12px",
   fontWeight: 700,
@@ -169,14 +169,14 @@ const totalsRowStyle = {
   justifyContent: "space-between",
   padding: "7px 0",
   fontSize: "13px",
-  borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+  borderBottom: "1px solid rgba(17, 24, 39, 0.08)",
 };
 
 const totalStyle = {
   ...totalsRowStyle,
   fontSize: "17px",
   fontWeight: 800,
-  color: "#f8fafc",
+  color: "#111827",
   borderBottom: "none",
   paddingTop: "12px",
 };
@@ -189,18 +189,18 @@ const actionBarStyle = {
 
 const actionButtonStyle = (primary) => ({
   borderRadius: "12px",
-  border: primary ? "none" : "1px solid rgba(148, 163, 184, 0.28)",
+  border: primary ? "none" : "1px solid rgba(17, 24, 39, 0.12)",
   padding: "12px 14px",
   fontWeight: 700,
   cursor: "pointer",
   background: primary
     ? "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
-    : "rgba(148, 163, 184, 0.12)",
-  color: primary ? "#fff" : "#d1d5db",
+    : "#ffffff",
+  color: primary ? "#fff" : "#111827",
 });
 
 const mapLinkStyle = {
-  color: "#93c5fd",
+  color: "#2563eb",
   fontSize: "12px",
   textDecoration: "none",
 };
@@ -215,9 +215,9 @@ const paymentOptionStyle = (active) => ({
   borderRadius: "12px",
   border: active
     ? "1px solid rgba(99, 102, 241, 0.9)"
-    : "1px solid rgba(148, 163, 184, 0.24)",
-  background: active ? "rgba(99, 102, 241, 0.22)" : "rgba(15, 23, 42, 0.48)",
-  color: "#f8fafc",
+    : "1px solid rgba(17, 24, 39, 0.12)",
+  background: active ? "#eef2ff" : "#ffffff",
+  color: "#111827",
   padding: "10px 12px",
   cursor: "pointer",
   textAlign: "left",
@@ -236,8 +236,8 @@ const securityChipWrapStyle = {
 const securityChipStyle = {
   border: "1px solid rgba(34, 197, 94, 0.42)",
   borderRadius: "999px",
-  background: "rgba(20, 83, 45, 0.24)",
-  color: "#86efac",
+  background: "#ecfdf3",
+  color: "#166534",
   padding: "7px 10px",
   fontSize: "12px",
   fontWeight: 700,
@@ -333,6 +333,134 @@ const OrderCreate = () => {
   });
 
   const [lineItems, setLineItems] = useState([createEmptyItem()]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const hadLoginClassOnRoot = root.classList.contains("change8-login-page");
+    const hadLoginClassOnBody = body?.classList.contains("change8-login-page");
+    const hadDashboardClassOnRoot = root.classList.contains(
+      "change8-storefront-dashboard-page",
+    );
+    const hadDashboardClassOnBody = body?.classList.contains(
+      "change8-storefront-dashboard-page",
+    );
+    const loginBgLayer = document.getElementById("change8-login-bg-layer");
+    const previousLayerDisplay = loginBgLayer?.style.display || "";
+
+    const shellNodes = Array.from(
+      new Set(
+        [
+          root,
+          body,
+          document.getElementById("app"),
+          document.querySelector('[data-testid="layout"]'),
+          document.querySelector('[data-css="layout"]'),
+          document.querySelector(".adminjs_Layout"),
+          document.querySelector("main"),
+          ...Array.from(
+            document.querySelectorAll(
+              '[data-css*="action-content"], [data-testid*="content"], .adminjs_Main, .adminjs_Main > div, .adminjs_Main > div > div, [data-css$="-content"]',
+            ),
+          ),
+        ].filter(Boolean),
+      ),
+    );
+
+    const previousInlineBackgrounds = new Map(
+      shellNodes.map((node) => [
+        node,
+        {
+          background: node.style.getPropertyValue("background"),
+          backgroundPriority: node.style.getPropertyPriority("background"),
+          backgroundColor: node.style.getPropertyValue("background-color"),
+          backgroundColorPriority:
+            node.style.getPropertyPriority("background-color"),
+          backgroundImage: node.style.getPropertyValue("background-image"),
+          backgroundImagePriority:
+            node.style.getPropertyPriority("background-image"),
+        },
+      ]),
+    );
+
+    root.classList.remove(
+      "change8-login-page",
+      "change8-storefront-dashboard-page",
+    );
+    body?.classList.remove(
+      "change8-login-page",
+      "change8-storefront-dashboard-page",
+    );
+    if (loginBgLayer) {
+      loginBgLayer.style.display = "none";
+    }
+
+    shellNodes.forEach((node) => {
+      node.style.setProperty("background", "#ffffff", "important");
+      node.style.setProperty("background-color", "#ffffff", "important");
+      node.style.setProperty("background-image", "none", "important");
+    });
+
+    root.classList.add("change8-order-create-active");
+    body?.classList.add("change8-order-create-active");
+
+    return () => {
+      root.classList.remove("change8-order-create-active");
+      body?.classList.remove("change8-order-create-active");
+
+      if (hadLoginClassOnRoot) {
+        root.classList.add("change8-login-page");
+      }
+
+      if (hadLoginClassOnBody) {
+        body?.classList.add("change8-login-page");
+      }
+
+      if (hadDashboardClassOnRoot) {
+        root.classList.add("change8-storefront-dashboard-page");
+      }
+
+      if (hadDashboardClassOnBody) {
+        body?.classList.add("change8-storefront-dashboard-page");
+      }
+
+      if (loginBgLayer) {
+        loginBgLayer.style.display = previousLayerDisplay;
+      }
+
+      previousInlineBackgrounds.forEach((styles, node) => {
+        if (!styles.background) {
+          node.style.removeProperty("background");
+        } else {
+          node.style.setProperty(
+            "background",
+            styles.background,
+            styles.backgroundPriority || "",
+          );
+        }
+
+        if (!styles.backgroundColor) {
+          node.style.removeProperty("background-color");
+        } else {
+          node.style.setProperty(
+            "background-color",
+            styles.backgroundColor,
+            styles.backgroundColorPriority || "",
+          );
+        }
+
+        if (!styles.backgroundImage) {
+          node.style.removeProperty("background-image");
+        } else {
+          node.style.setProperty(
+            "background-image",
+            styles.backgroundImage,
+            styles.backgroundImagePriority || "",
+          );
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -564,15 +692,94 @@ const OrderCreate = () => {
 
   return (
     <div style={pageStyle}>
-      <style>{responsiveCss}</style>
+      <style>{`
+        html.change8-order-create-active,
+        html.change8-order-create-active body,
+        html.change8-order-create-active #app,
+        html.change8-order-create-active .adminjs_Layout,
+        html.change8-order-create-active [data-testid="layout"],
+        html.change8-order-create-active [data-css="layout"],
+        html.change8-order-create-active main,
+        body.change8-order-create-active,
+        body.change8-order-create-active #app,
+        body.change8-order-create-active .adminjs_Layout,
+        body.change8-order-create-active [data-testid="layout"],
+        body.change8-order-create-active [data-css="layout"],
+        body.change8-order-create-active main {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          background-image: none !important;
+        }
 
-      <div style={headerStyle}>
-        <h1 style={titleStyle}>Create New Order</h1>
-        <p style={descStyle}>
-          Customer details, line items, payment, shipping, and totals in one
-          guided flow.
-        </p>
-      </div>
+        html.change8-order-create-active #app > div,
+        html.change8-order-create-active #app > div > div,
+        html.change8-order-create-active #app > div > div > div,
+        html.change8-order-create-active .adminjs_Main,
+        html.change8-order-create-active .adminjs_Main > div,
+        html.change8-order-create-active .adminjs_Main > div > div,
+        html.change8-order-create-active [data-css*="action-content"],
+        html.change8-order-create-active [data-testid*="content"],
+        html.change8-order-create-active [data-css$="-content"] {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          background-image: none !important;
+        }
+
+        html.change8-order-create-active [data-testid="sidebar"],
+        html.change8-order-create-active .adminjs_Sidebar,
+        html.change8-order-create-active section[data-css="sidebar"],
+        html.change8-order-create-active aside[data-css="sidebar"],
+        html.change8-order-create-active nav[data-css="sidebar"] {
+          display: none !important;
+          width: 0 !important;
+          min-width: 0 !important;
+          max-width: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          border: 0 !important;
+          overflow: hidden !important;
+          box-shadow: none !important;
+        }
+
+        html.change8-order-create-active [data-testid="topbar"],
+        html.change8-order-create-active .adminjs_TopBar,
+        html.change8-order-create-active header[data-css="topbar"],
+        html.change8-order-create-active section[data-css="topbar"] {
+          display: none !important;
+        }
+
+        html.change8-order-create-active [data-testid="action-header"],
+        html.change8-order-create-active [data-css*="action-header"],
+        html.change8-order-create-active [data-testid*="breadcrumbs"],
+        html.change8-order-create-active [data-css*="breadcrumbs"],
+        html.change8-order-create-active .adminjs_Breadcrumb {
+          display: none !important;
+        }
+
+        html.change8-order-create-active .adminjs_Layout,
+        html.change8-order-create-active [data-testid="layout"],
+        html.change8-order-create-active [data-css="layout"] {
+          grid-template-columns: 1fr !important;
+        }
+
+        html.change8-order-create-active .adminjs_Layout > *:not([data-testid="sidebar"]),
+        html.change8-order-create-active [data-testid="layout"] > *:not([data-testid="sidebar"]),
+        html.change8-order-create-active [data-css="layout"] > *:not([data-testid="sidebar"]) {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        html.change8-order-create-active body::before,
+        html.change8-order-create-active::before,
+        body.change8-order-create-active::before {
+          content: none !important;
+          display: none !important;
+          background: none !important;
+          background-image: none !important;
+        }
+
+        ${responsiveCss}
+      `}</style>
 
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: "16px" }}>
         <div className="change8-order-layout" style={layoutStyle}>

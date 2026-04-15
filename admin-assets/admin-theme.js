@@ -5,7 +5,6 @@
     window.location.pathname.includes("/login") ||
     window.location.pathname === "/admin" ||
     window.location.pathname === "/admin/";
-  let stickyLoginMode = false;
 
   const hasLoginForm = () => {
     return Boolean(
@@ -16,41 +15,161 @@
   };
 
   const isAuthScreen = () => {
-    const hasSidebar = Boolean(
-      document.querySelector('[data-testid="sidebar"]'),
-    );
-    const hasCurrentUser = Boolean(
-      document.querySelector('[data-testid="currentUser"]'),
-    );
-
-    return (
-      hasLoginForm() ||
-      (!hasSidebar &&
-        !hasCurrentUser &&
-        window.location.pathname.startsWith("/admin"))
-    );
+    // Treat auth screen strictly as a login form/password screen.
+    return hasLoginForm();
   };
 
-  const isLoginPage = () => isLoginPath || stickyLoginMode || isAuthScreen();
+  const isLoginPage = () => isLoginPath || isAuthScreen();
+
+  const clearLoginBackground = () => {
+    const layer = document.getElementById("change8-login-bg-layer");
+    if (layer) {
+      layer.remove();
+    }
+
+    const style = document.getElementById("change8-login-bg-style");
+    if (style) {
+      style.remove();
+    }
+
+    const bgNodes = [
+      root,
+      document.body,
+      document.getElementById("app"),
+      document.querySelector('[data-testid="layout"]'),
+      document.querySelector('[data-css="layout"]'),
+      document.querySelector(".adminjs_Layout"),
+      document.querySelector("main"),
+    ].filter(Boolean);
+
+    bgNodes.forEach((node) => {
+      node.style.removeProperty("background-image");
+      node.style.removeProperty("background-size");
+      node.style.removeProperty("background-position");
+      node.style.removeProperty("background-repeat");
+      node.style.removeProperty("background-attachment");
+    });
+  };
+
+  const isCategoryPage = () => {
+    const path = window.location.pathname.toLowerCase();
+    return (
+      path.includes("/resources/category") ||
+      path.includes("/resources/categories") ||
+      path.includes("/category") ||
+      path.includes("/categories")
+    );
+  };
 
   const syncLoginPageClass = () => {
     if (isLoginPage()) {
-      stickyLoginMode = true;
       root.classList.add("change8-login-page");
-    } else if (!window.location.pathname.startsWith("/admin")) {
-      // Allow cleanup only when leaving admin routes.
-      stickyLoginMode = false;
+      return;
+    }
+
+    if (window.location.pathname.startsWith("/admin")) {
       root.classList.remove("change8-login-page");
+      clearLoginBackground();
     }
   };
 
-  syncLoginPageClass();
+  const syncCategoryPageClass = () => {
+    if (isCategoryPage()) {
+      root.classList.add("change8-category-page");
+      return;
+    }
+
+    root.classList.remove("change8-category-page");
+  };
+
+  const syncRouteDecorations = () => {
+    syncLoginPageClass();
+    syncCategoryPageClass();
+  };
+
+  syncRouteDecorations();
+
+  if (!window.__change8RouteHooksBound) {
+    const wrapHistoryMethod = (methodName) => {
+      const originalMethod = history[methodName];
+      history[methodName] = function (...args) {
+        const result = originalMethod.apply(this, args);
+        window.dispatchEvent(new Event("change8-routechange"));
+        return result;
+      };
+    };
+
+    wrapHistoryMethod("pushState");
+    wrapHistoryMethod("replaceState");
+    window.addEventListener("popstate", () => {
+      window.dispatchEvent(new Event("change8-routechange"));
+    });
+    window.addEventListener("change8-routechange", syncRouteDecorations);
+    window.__change8RouteHooksBound = true;
+  }
 
   const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
   const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
   const applyTheme = (theme) => {
     root.setAttribute("data-admin-theme", theme);
+  };
+
+  const getCookieValue = (name) => {
+    const encodedName = `${name}=`;
+    return (
+      document.cookie
+        .split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(encodedName))
+        ?.slice(encodedName.length) || ""
+    );
+  };
+
+  const syncUserRoleState = async () => {
+    if (!window.location.pathname.startsWith("/admin") || isLoginPage()) {
+      root.removeAttribute("data-admin-role");
+      root.classList.remove("change8-user-role");
+      return;
+    }
+
+    const role = String(
+      getCookieValue("change8_admin_role") || "",
+    ).toLowerCase();
+
+    if (role === "user") {
+      root.setAttribute("data-admin-role", "user");
+      root.classList.add("change8-user-role");
+      return;
+    }
+
+    try {
+      const response = await fetch("/admin/context/current-user", {
+        credentials: "same-origin",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to resolve current admin role");
+      }
+
+      const currentUser = await response.json();
+      const resolvedRole = String(currentUser?.role || "").toLowerCase();
+
+      if (resolvedRole === "user") {
+        root.setAttribute("data-admin-role", "user");
+        root.classList.add("change8-user-role");
+        return;
+      }
+
+      root.removeAttribute("data-admin-role");
+      root.classList.remove("change8-user-role");
+    } catch (error) {
+      root.removeAttribute("data-admin-role");
+      root.classList.remove("change8-user-role");
+    }
   };
 
   const getInitialTheme = () => {
@@ -543,6 +662,7 @@
   };
 
   applyTheme(getInitialTheme());
+  syncUserRoleState();
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mountToggle);

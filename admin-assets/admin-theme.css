@@ -122,6 +122,25 @@ html.change8-login-page [data-css="layout"] > div {
   background-color: transparent !important;
 }
 
+/* Category page: remove the filters drawer/panel entirely */
+html.change8-category-page .adminjs_FilterDrawer,
+html.change8-category-page [data-testid="filter-drawer"],
+html.change8-category-page [class*="FilterDrawer"],
+html.change8-category-page [class*="filter-drawer"],
+html.change8-category-page [data-testid*="filter-drawer"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.change8-category-page [data-testid="filter-button"],
+html.change8-category-page [class*="FilterButton"],
+html.change8-category-page [class*="filter-button"],
+html.change8-category-page button[aria-label*="Filter" i] {
+  display: none !important;
+}
+
 /* Fallback: apply background even if the html class is not set yet */
 body:has(form[action*="login"]),
 body:has(input[type="password"]) {
@@ -147,6 +166,91 @@ nav,
   box-shadow:
     inset -1px 0 0 rgba(130, 167, 229, 0.1),
     14px 0 36px rgba(5, 8, 24, 0.5) !important;
+}
+
+html[data-admin-role="user"] [data-testid="sidebar"],
+html[data-admin-role="user"] .adminjs_Sidebar,
+html[data-admin-role="user"] section[data-css="sidebar"],
+html[data-admin-role="user"] aside[data-css="sidebar"],
+html[data-admin-role="user"] nav[data-css="sidebar"] {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-admin-role="user"] .adminjs_Layout,
+html[data-admin-role="user"] [data-testid="layout"],
+html[data-admin-role="user"] [data-css="layout"] {
+  grid-template-columns: 1fr !important;
+}
+
+html[data-admin-role="user"] .adminjs_Layout > *:not([data-testid="sidebar"]),
+html[data-admin-role="user"]
+  [data-testid="layout"]
+  > *:not([data-testid="sidebar"]),
+html[data-admin-role="user"]
+  [data-css="layout"]
+  > *:not([data-testid="sidebar"]) {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html.change8-storefront-dashboard-page,
+html.change8-storefront-dashboard-page body,
+html.change8-storefront-dashboard-page #app,
+html.change8-storefront-dashboard-page .adminjs_Layout,
+html.change8-storefront-dashboard-page [class*="adminjs_Layout"],
+html.change8-storefront-dashboard-page [data-testid="layout"],
+html.change8-storefront-dashboard-page [data-css="layout"] {
+  background: #f7f7f7 !important;
+  background-color: #f7f7f7 !important;
+}
+
+html.change8-storefront-dashboard-page [data-testid="sidebar"],
+html.change8-storefront-dashboard-page .adminjs_Sidebar,
+html.change8-storefront-dashboard-page section[data-css="sidebar"],
+html.change8-storefront-dashboard-page aside[data-css="sidebar"],
+html.change8-storefront-dashboard-page nav[data-css="sidebar"],
+html.change8-storefront-dashboard-page [data-testid="topbar"],
+html.change8-storefront-dashboard-page .adminjs_TopBar,
+html.change8-storefront-dashboard-page header[data-css="topbar"],
+html.change8-storefront-dashboard-page section[data-css="topbar"] {
+  display: none !important;
+}
+
+html.change8-storefront-dashboard-page .adminjs_Layout,
+html.change8-storefront-dashboard-page [data-testid="layout"],
+html.change8-storefront-dashboard-page [data-css="layout"] {
+  grid-template-columns: 1fr !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html.change8-storefront-dashboard-page #app > div,
+html.change8-storefront-dashboard-page #app > div > div,
+html.change8-storefront-dashboard-page #app > div > div > div,
+html.change8-storefront-dashboard-page main {
+  background: #f7f7f7 !important;
+  background-color: #f7f7f7 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html.change8-storefront-dashboard-page .change8-storefront-dashboard {
+  min-height: 100vh !important;
+  width: 100% !important;
+}
+
+html.change8-storefront-dashboard-page body {
+  overflow-x: hidden !important;
 }
 
 .adminjs_SidebarHeader,
@@ -188,6 +292,7 @@ header,
 [data-css="topbar"] {
   padding-left: 18px !important;
   padding-right: 18px !important;
+  overflow: visible !important;
 }
 
 /* Ensure inner components inherit the themed backgrounds */
@@ -222,6 +327,17 @@ header,
   border: 1px solid var(--admin-border) !important;
   border-radius: 10px !important;
   padding: 6px 10px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+[data-testid="currentUser"],
+[data-css*="current-user"],
+[data-css*="currentUser"] {
+  position: relative !important;
+  z-index: 120 !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
 }
 
 /* Ensure user dropdown keeps a visible surface (not transparent) */
@@ -242,6 +358,7 @@ header,
   border-radius: 12px !important;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3) !important;
   overflow: hidden !important;
+  margin-top: 4px !important;
 }
 
 [data-testid="currentUser"] [role="menuitem"],
@@ -370,6 +487,17 @@ html[data-admin-theme="light"]
   border: 1px solid rgba(226, 191, 102, 0.2) !important;
   border-radius: 12px !important;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+html.change8-current-user-menu-open [role="menu"],
+html.change8-current-user-menu-open [data-testid="dropdown-list"],
+html.change8-current-user-menu-open [class*="DropDownList"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 [role="menu"] *,
@@ -695,7 +823,6 @@ footer,
 /* Modern Row Action Dropdown */
 .adminjs_DropDownList,
 [data-testid="dropdown-list"] {
-  display: none !important;
   background: var(--admin-surface-2) !important;
   border: 1px solid var(--admin-border) !important;
   border-radius: 8px !important;
@@ -704,20 +831,10 @@ footer,
   overflow: hidden !important;
 }
 
-/* ONLY show when AdminJS explicitly sets any display style other than none */
-.adminjs_DropDownList[style*="display: block"],
-.adminjs_DropDownList[style*="display: flex"],
-.adminjs_DropDownList[style*="display: inline"],
-[data-testid="dropdown-list"][style*="display: block"],
-[data-testid="dropdown-list"][style*="display: flex"],
-[data-testid="dropdown-list"][style*="display: inline"] {
-  display: block !important;
-}
-
-/* Hide individual action links that are cluttering the row directly */
+/* Keep row content visible: previous broad hide rule also hid real cell values in list rows. */
 .adminjs_Table td [data-testid*="action-"],
 .adminjs_Table td [class*="Button"] {
-  display: none !important;
+  display: inline-flex !important;
 }
 
 /* Re-enable them specifically when they are inside a dropdown list */
@@ -726,6 +843,26 @@ footer,
 .adminjs_DropDownList a,
 [data-testid="dropdown-list"] a {
   display: flex !important;
+}
+
+/* Hide Edit/Delete actions from row menus and inline row actions */
+.adminjs_DropDownList [data-testid*="action-edit"],
+.adminjs_DropDownList [data-testid*="action-delete"],
+.adminjs_DropDownList [data-testid*="action-show"],
+[data-testid="dropdown-list"] [data-testid*="action-edit"],
+[data-testid="dropdown-list"] [data-testid*="action-delete"],
+.adminjs_DropDownList [data-testid*="action-show"],
+[data-testid="dropdown-list"] [data-testid*="action-show"],
+.adminjs_Table td [data-testid*="action-edit"],
+.adminjs_Table td [data-testid*="action-delete"],
+.adminjs_Table td [data-testid*="action-show"],
+.adminjs_DropDownList a[href*="/edit"],
+.adminjs_DropDownList a[href*="/delete"],
+.adminjs_DropDownList a[href*="/show"],
+[data-testid="dropdown-list"] a[href*="/edit"],
+[data-testid="dropdown-list"] a[href*="/delete"],
+[data-testid="dropdown-list"] a[href*="/show"] {
+  display: none !important;
 }
 
 .adminjs_DropDownItem,

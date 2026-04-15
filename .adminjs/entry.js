@@ -19,3 +19,5 @@ import ProductImageUpload from '../admin/product-image-upload'
 AdminJS.UserComponents.ProductImageUpload = ProductImageUpload
 import CategoryShow from '../admin/category-show'
 AdminJS.UserComponents.CategoryShow = CategoryShow
+import About from '../admin/about'
+AdminJS.UserComponents.About = About
