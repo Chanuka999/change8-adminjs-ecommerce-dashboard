@@ -281,7 +281,7 @@ const paymentOptions = [
   { value: "Cash on Delivery", label: "Cash on Delivery", icon: "📦" },
 ];
 
-const itemSizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
+const fallbackSizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
 const shippingMethods = [
   "PickMe Flash",
   "Pronto",
@@ -301,9 +301,59 @@ const formatMoney = (value) => {
   })}`;
 };
 
+const parseSizeStock = (value) => {
+  if (!value) {
+    return {};
+  }
+
+  let source = value;
+  if (typeof source === "string") {
+    try {
+      source = JSON.parse(source);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const [rawSize, rawQty] of Object.entries(source)) {
+    const size = String(rawSize || "")
+      .trim()
+      .toUpperCase();
+    if (!size) {
+      continue;
+    }
+
+    const qty = Math.max(0, Math.trunc(Number(rawQty || 0)));
+    normalized[size] = qty;
+  }
+
+  return normalized;
+};
+
+const getSizeEntries = (product) => {
+  const sizeStock = parseSizeStock(product?.sizeStock);
+  return Object.entries(sizeStock)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([size, qty]) => ({ size, qty }));
+};
+
+const getSizeOptions = (product) => {
+  const entries = getSizeEntries(product);
+  if (entries.length > 0) {
+    return entries;
+  }
+
+  return fallbackSizeOptions.map((size) => ({ size, qty: null }));
+};
+
 const createEmptyItem = () => ({
   productId: "",
-  size: "M",
+  size: "",
   quantity: 1,
   unitPrice: 0,
 });
@@ -497,10 +547,13 @@ const OrderCreate = () => {
         }
 
         if (contextData?.selectedProduct?.id) {
+          const selectedProductSizeOptions = getSizeOptions(
+            contextData.selectedProduct,
+          );
           setLineItems([
             {
               productId: String(contextData.selectedProduct.id),
-              size: "M",
+              size: selectedProductSizeOptions[0]?.size || "",
               quantity: 1,
               unitPrice: toNumber(contextData.selectedProduct.price),
             },
@@ -515,10 +568,11 @@ const OrderCreate = () => {
           const selected = productsList.find(
             (p) => String(p.id) === String(preProductId),
           );
+          const selectedProductSizeOptions = getSizeOptions(selected);
           setLineItems([
             {
               productId: String(preProductId),
-              size: "M",
+              size: selectedProductSizeOptions[0]?.size || "",
               quantity: 1,
               unitPrice: toNumber(selected?.price),
             },
@@ -586,11 +640,56 @@ const OrderCreate = () => {
       if (key === "productId") {
         item.productId = value;
         const product = products.find((p) => String(p.id) === String(value));
+        const sizeOptions = getSizeOptions(product);
         item.unitPrice = toNumber(product?.price);
+        item.size = sizeOptions[0]?.size || "";
+        const maxQtyForSize =
+          sizeOptions[0]?.qty === null
+            ? null
+            : Math.max(1, Number(sizeOptions[0]?.qty || 0));
+        if (maxQtyForSize !== null) {
+          item.quantity = Math.max(
+            1,
+            Math.min(toNumber(item.quantity), maxQtyForSize),
+          );
+        }
       } else if (key === "size") {
         item.size = value;
+        const product = products.find(
+          (p) => String(p.id) === String(item.productId),
+        );
+        const sizeOptions = getSizeOptions(product);
+        const selectedSizeOption = sizeOptions.find(
+          (option) => option.size === value,
+        );
+        if (selectedSizeOption && selectedSizeOption.qty !== null) {
+          const maxQtyForSize = Math.max(
+            1,
+            Number(selectedSizeOption.qty || 0),
+          );
+          item.quantity = Math.max(
+            1,
+            Math.min(toNumber(item.quantity), maxQtyForSize),
+          );
+        }
       } else if (key === "quantity") {
-        item.quantity = Math.max(1, toNumber(value));
+        const product = products.find(
+          (p) => String(p.id) === String(item.productId),
+        );
+        const sizeOptions = getSizeOptions(product);
+        const selectedSizeOption = sizeOptions.find(
+          (option) => option.size === item.size,
+        );
+        const parsedQty = Math.max(1, toNumber(value));
+        if (selectedSizeOption && selectedSizeOption.qty !== null) {
+          const maxQtyForSize = Math.max(
+            1,
+            Number(selectedSizeOption.qty || 0),
+          );
+          item.quantity = Math.min(parsedQty, maxQtyForSize);
+        } else {
+          item.quantity = parsedQty;
+        }
       } else if (key === "unitPrice") {
         item.unitPrice = Math.max(0, toNumber(value));
       }
@@ -637,6 +736,38 @@ const OrderCreate = () => {
     if (validItems.length === 0) {
       alert("At least one product line item is required.");
       return;
+    }
+
+    for (const item of validItems) {
+      const selectedProduct = products.find(
+        (product) => String(product.id) === String(item.productId),
+      );
+      const sizeEntries = getSizeEntries(selectedProduct);
+
+      if (sizeEntries.length > 0) {
+        if (!item.size) {
+          alert("Please select a size for all products.");
+          return;
+        }
+
+        const selectedSize = sizeEntries.find(
+          (entry) => entry.size === String(item.size).toUpperCase(),
+        );
+
+        if (!selectedSize) {
+          alert(
+            `Selected size is not available for ${selectedProduct?.name || "this product"}.`,
+          );
+          return;
+        }
+
+        if (toNumber(item.quantity) > selectedSize.qty) {
+          alert(
+            `${selectedProduct?.name || "Product"} (${selectedSize.size}) has only ${selectedSize.qty} in stock.`,
+          );
+          return;
+        }
+      }
     }
 
     setSubmitting(true);
@@ -941,6 +1072,13 @@ const OrderCreate = () => {
                   const selectedProduct = products.find(
                     (p) => String(p.id) === String(item.productId),
                   );
+                  const sizeOptions = getSizeOptions(selectedProduct);
+                  const selectedSizeOption = sizeOptions.find(
+                    (option) => option.size === item.size,
+                  );
+                  const sizeStockText = getSizeEntries(selectedProduct)
+                    .map((entry) => `${entry.size}: ${entry.qty}`)
+                    .join(" | ");
                   const itemTotal =
                     toNumber(item.quantity) * toNumber(item.unitPrice);
 
@@ -1015,13 +1153,20 @@ const OrderCreate = () => {
                           <span style={{ fontSize: "12px", color: "#cbd5e1" }}>
                             Size: {item.size || "-"} | Qty: {item.quantity}
                           </span>
+                          {sizeStockText ? (
+                            <span
+                              style={{ fontSize: "11px", color: "#facc15" }}
+                            >
+                              Available: {sizeStockText}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
 
                       <div style={rowStyle}>
                         <label style={labelStyle}>Size</label>
                         <select
-                          value={item.size || "M"}
+                          value={item.size || ""}
                           onChange={(event) =>
                             handleLineItemChange(
                               index,
@@ -1030,10 +1175,17 @@ const OrderCreate = () => {
                             )
                           }
                           style={inputStyle}
+                          required
                         >
-                          {itemSizeOptions.map((sizeOption) => (
-                            <option key={sizeOption} value={sizeOption}>
-                              {sizeOption}
+                          <option value="">Select size</option>
+                          {sizeOptions.map((sizeOption) => (
+                            <option
+                              key={sizeOption.size}
+                              value={sizeOption.size}
+                            >
+                              {sizeOption.qty === null
+                                ? sizeOption.size
+                                : `${sizeOption.size} (${sizeOption.qty})`}
                             </option>
                           ))}
                         </select>
@@ -1045,6 +1197,15 @@ const OrderCreate = () => {
                           <input
                             type="number"
                             min="1"
+                            max={
+                              selectedSizeOption?.qty === null ||
+                              selectedSizeOption?.qty === undefined
+                                ? undefined
+                                : Math.max(
+                                    1,
+                                    Number(selectedSizeOption.qty || 0),
+                                  )
+                            }
                             value={item.quantity}
                             onChange={(event) =>
                               handleLineItemChange(

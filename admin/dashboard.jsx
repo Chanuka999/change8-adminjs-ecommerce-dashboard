@@ -121,7 +121,7 @@ const Dashboard = () => {
         const [summaryResponse, productsResponse, ordersResponse] =
           await Promise.all([
             fetch("/admin/api/dashboard", { credentials: "same-origin" }),
-            fetch("/admin/api/resources/Products/actions/list", {
+            fetch("/api/products", {
               credentials: "same-origin",
             }),
             fetch("/admin/api/resources/Orders/actions/list", {
@@ -134,7 +134,7 @@ const Dashboard = () => {
           : {};
         const productPayload = productsResponse.ok
           ? await productsResponse.json()
-          : {};
+          : [];
         const orderPayload = ordersResponse.ok
           ? await ordersResponse.json()
           : {};
@@ -143,8 +143,8 @@ const Dashboard = () => {
           return;
         }
 
-        const loadedRecords = Array.isArray(productPayload?.records)
-          ? productPayload.records.map(normalizeProduct)
+        const loadedRecords = Array.isArray(productPayload)
+          ? productPayload.map(normalizeProduct)
           : [];
 
         const loadedOrders = Array.isArray(orderPayload?.records)
@@ -336,13 +336,40 @@ const Dashboard = () => {
   }, [records]);
 
   const isAdminUser = currentUserRole === "admin";
-  const recentProducts = Array.isArray(records) ? records.slice(0, 5) : [];
+  const adminProductRows = Array.isArray(records) ? records.slice(0, 12) : [];
   const categoryPreview = categories.slice(0, 6);
 
   if (isAdminUser) {
     return (
       <div className="change8-admin-dashboard">
         <style>{`
+          html.change8-storefront-dashboard-page,
+          html.change8-storefront-dashboard-page body,
+          html.change8-storefront-dashboard-page #app,
+          html.change8-storefront-dashboard-page .adminjs_Layout,
+          html.change8-storefront-dashboard-page [data-testid="layout"],
+          html.change8-storefront-dashboard-page [data-css="layout"],
+          html.change8-storefront-dashboard-page main,
+          body.change8-storefront-dashboard-page,
+          body.change8-storefront-dashboard-page #app,
+          body.change8-storefront-dashboard-page .adminjs_Layout,
+          body.change8-storefront-dashboard-page [data-testid="layout"],
+          body.change8-storefront-dashboard-page [data-css="layout"],
+          body.change8-storefront-dashboard-page main {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+          }
+
+          html.change8-storefront-dashboard-page body::before,
+          html.change8-storefront-dashboard-page::before,
+          body.change8-storefront-dashboard-page::before {
+            content: none !important;
+            display: none !important;
+            background: none !important;
+            background-image: none !important;
+          }
+
           .change8-admin-dashboard {
             min-height: 100vh;
             padding: 28px;
@@ -492,6 +519,76 @@ const Dashboard = () => {
             font-size: 13px;
           }
 
+          .change8-admin-table-wrap {
+            margin-top: 14px;
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 14px;
+            background: #ffffff;
+          }
+
+          .change8-admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+          }
+
+          .change8-admin-table th,
+          .change8-admin-table td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+            font-size: 14px;
+          }
+
+          .change8-admin-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            white-space: nowrap;
+          }
+
+          .change8-admin-table td {
+            color: #0f172a;
+          }
+
+          .change8-admin-table tr:last-child td {
+            border-bottom: 0;
+          }
+
+          .change8-admin-thumb-cell {
+            width: 76px;
+          }
+
+          .change8-admin-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: #f8fafc;
+            display: block;
+          }
+
+          .change8-admin-status-pill {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .change8-admin-status-pill--active {
+            background: #dcfce7;
+            color: #166534;
+          }
+
+          .change8-admin-status-pill--inactive {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+
           @media (max-width: 1100px) {
             .change8-admin-dashboard-cards,
             .change8-admin-dashboard-links {
@@ -581,84 +678,61 @@ const Dashboard = () => {
             </a>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: "16px",
-            }}
-          >
-            <div className="change8-admin-panel" style={{ padding: "20px" }}>
-              <h2 className="change8-admin-section-title">Recent Products</h2>
-              <div style={{ marginTop: "14px", display: "grid", gap: "12px" }}>
-                {recentProducts.map((product) => (
-                  <a
-                    key={product.id}
-                    href={getShowHref(product)}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "12px",
-                      padding: "14px 16px",
-                      borderRadius: "14px",
-                      border: "1px solid rgba(15, 23, 42, 0.08)",
-                      textDecoration: "none",
-                      color: "#0f172a",
-                      background: "#f8fafc",
-                    }}
-                  >
-                    <span>
-                      <strong style={{ display: "block", marginBottom: "4px" }}>
-                        {product.name}
-                      </strong>
-                      <span style={{ color: "#64748b", fontSize: "13px" }}>
-                        Stock: {product.stock} | {product.categoryName}
-                      </span>
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {formatCurrency(product.price)}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="change8-admin-panel" style={{ padding: "20px" }}>
-              <h2 className="change8-admin-section-title">Recent Orders</h2>
-              <div style={{ marginTop: "14px", display: "grid", gap: "12px" }}>
-                {recentOrders.map((order) => (
-                  <a
-                    key={order.id}
-                    href={`/admin/resources/Orders/records/${encodeURIComponent(String(order.id))}/show`}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "12px",
-                      padding: "14px 16px",
-                      borderRadius: "14px",
-                      border: "1px solid rgba(15, 23, 42, 0.08)",
-                      textDecoration: "none",
-                      color: "#0f172a",
-                      background: "#f8fafc",
-                    }}
-                  >
-                    <span>
-                      <strong style={{ display: "block", marginBottom: "4px" }}>
-                        {order.userName}
-                      </strong>
-                      <span style={{ color: "#64748b", fontSize: "13px" }}>
-                        {order.status} |{" "}
-                        {order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString()
-                          : "New"}
-                      </span>
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {formatCurrency(order.totalAmount)}
-                    </span>
-                  </a>
-                ))}
-              </div>
+          <div className="change8-admin-panel" style={{ padding: "20px" }}>
+            <h2 className="change8-admin-section-title">Products Table</h2>
+            <div className="change8-admin-table-wrap">
+              <table className="change8-admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminProductRows.length ? (
+                    adminProductRows.map((product) => (
+                      <tr key={product.id}>
+                        <td className="change8-admin-thumb-cell">
+                          <img
+                            className="change8-admin-thumb"
+                            src={productImage(product)}
+                            alt={product.name}
+                          />
+                        </td>
+                        <td>{product.name}</td>
+                        <td>{product.categoryName || "-"}</td>
+                        <td>{Number(product.stock || 0)}</td>
+                        <td>{formatCurrency(product.price)}</td>
+                        <td>
+                          <span
+                            className={`change8-admin-status-pill ${
+                              product.isActive
+                                ? "change8-admin-status-pill--active"
+                                : "change8-admin-status-pill--inactive"
+                            }`}
+                          >
+                            {product.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td>
+                          <a href={getShowHref(product)}>View</a>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} style={{ color: "#64748b" }}>
+                        No products available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -711,7 +785,7 @@ const Dashboard = () => {
         }
 
         .change8-top-strip {
-          background: var(--success);
+          background:#0EA5E9;
           color: #000;
           text-align: center;
           font-size: 13px;
@@ -787,6 +861,14 @@ const Dashboard = () => {
           line-height: 0.95;
           text-align: center;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .change8-brand img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          border-radius: 50%;
         }
 
         .change8-brand small {
@@ -1339,7 +1421,7 @@ const Dashboard = () => {
           </div>
 
           <div className="change8-brand" aria-label="Store brand">
-            chanuka
+            <img src="/public/icon.png" alt="Store logo" />
           </div>
 
           <div className="change8-nav-actions">
