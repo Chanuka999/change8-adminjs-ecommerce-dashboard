@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,6 +14,7 @@ const useSsl =
 const baseOptions = {
   dialect: "postgres",
   logging: false,
+  dialectModule: pg,
   dialectOptions: useSsl
     ? {
         ssl: {
