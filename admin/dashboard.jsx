@@ -317,8 +317,8 @@ const Dashboard = () => {
   const heroHref = getShowHref(featuredProduct);
   const ordersListHref = "/admin/resources/Orders/actions/list";
 
-  const spotlightProducts = useMemo(() => {
-    return filteredProducts.slice(0, 5);
+  const displayedProducts = useMemo(() => {
+    return filteredProducts;
   }, [filteredProducts]);
 
   const categories = useMemo(() => {
@@ -1415,7 +1415,7 @@ const Dashboard = () => {
             <a href="#hero" className="is-active">
               Home
             </a>
-            <a href="/admin/resources/Products/actions/list">Product</a>
+            <a href="#products">Product</a>
             <a href="/admin/pages/About">About</a>
             <a href="#contact">Contact Us</a>
           </div>
@@ -1594,11 +1594,11 @@ const Dashboard = () => {
 
             {loading ? (
               <div className="change8-loading">Loading products...</div>
-            ) : spotlightProducts.length === 0 ? (
+            ) : displayedProducts.length === 0 ? (
               <div className="change8-empty">No products found.</div>
             ) : (
               <div className="change8-product-grid">
-                {spotlightProducts.map((product) => {
+                {displayedProducts.map((product) => {
                   const href = getShowHref(product);
                   const image = productImage(product);
 
