@@ -528,21 +528,10 @@ const admin = new AdminJS({
   ],
 });
 
-const isServerlessRuntime =
-  process.env.VERCEL === "1" ||
-  String(process.env.VERCEL_ENV || "").trim().length > 0 ||
-  String(process.env.VERCEL_URL || "").trim().length > 0 ||
-  String(process.env.NOW_REGION || "").trim().length > 0 ||
-  String(process.env.AWS_REGION || "").trim().length > 0;
-
 const shouldWatchAdmin =
   String(process.env.ADMIN_WATCH || "")
     .trim()
-    .toLowerCase() === "true" ||
-  (!isServerlessRuntime &&
-    String(process.env.NODE_ENV || "")
-      .trim()
-      .toLowerCase() !== "production");
+    .toLowerCase() === "true";
 
 if (shouldWatchAdmin) {
   admin.watch();
