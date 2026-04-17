@@ -1,7 +1,8 @@
 {
+  "installCommand": "npm install --include=optional",
   "functions": {
     "api/index.js": {
-      "includeFiles": "node_modules/{pg,pg-hstore}/**"
+      "includeFiles": "node_modules/{pg,pg-hstore,@rollup/rollup-linux-x64-gnu,rollup}/**"
     }
   },
   "rewrites": [
