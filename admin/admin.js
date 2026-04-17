@@ -535,7 +535,16 @@ const isServerlessRuntime =
   String(process.env.NOW_REGION || "").trim().length > 0 ||
   String(process.env.AWS_REGION || "").trim().length > 0;
 
-if (!isServerlessRuntime) {
+const shouldWatchAdmin =
+  String(process.env.ADMIN_WATCH || "")
+    .trim()
+    .toLowerCase() === "true" ||
+  (!isServerlessRuntime &&
+    String(process.env.NODE_ENV || "")
+      .trim()
+      .toLowerCase() !== "production");
+
+if (shouldWatchAdmin) {
   admin.watch();
 }
 
