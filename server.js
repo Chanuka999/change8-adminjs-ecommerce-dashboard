@@ -70,25 +70,7 @@ app.get("/favicon.ico", (_req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  return res.status(200).send(`<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Change8 API</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 40px; color: #0f172a; }
-      h1 { margin-bottom: 8px; }
-      code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
-      a { color: #1d4ed8; text-decoration: none; font-weight: 600; }
-    </style>
-  </head>
-  <body>
-    <h1>Change8 Backend Is Running</h1>
-    <p>API is live. Try <code>/api/products</code> or <code>/api/login</code>.</p>
-    <p>Open the website/admin UI: <a href="/admin">/admin</a></p>
-  </body>
-</html>`);
+  return res.redirect(302, "/admin");
 });
 
 app.get("/health", (_req, res) => {
