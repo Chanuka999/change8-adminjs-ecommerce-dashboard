@@ -528,7 +528,9 @@ const admin = new AdminJS({
   ],
 });
 
-if (process.env.NODE_ENV !== "production") {
+const isVercelRuntime = process.env.VERCEL === "1";
+
+if (!isVercelRuntime) {
   admin.watch();
 }
 

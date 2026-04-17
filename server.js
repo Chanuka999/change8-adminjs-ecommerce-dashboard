@@ -3,6 +3,7 @@ import sequelize from "./config/database.js";
 import adminRouter from "./admin/admin.js";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -23,6 +24,23 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
 app.use("/public", express.static(path.join(__dirname, "public")));
+
+app.get("/admin/frontend/assets/components.bundle.js", (_req, res) => {
+  const bundlePath = path.join(__dirname, ".adminjs", "bundle.js");
+
+  try {
+    if (fs.existsSync(bundlePath)) {
+      const bundleContent = fs.readFileSync(bundlePath, "utf8");
+      return res.type("application/javascript").send(bundleContent);
+    }
+  } catch (error) {
+    console.warn("Failed to serve components bundle fallback:", error.message);
+  }
+
+  return res
+    .type("application/javascript")
+    .send("window.AdminJS = window.AdminJS || {}; ");
+});
 
 app.use("/admin", (req, res, next) => {
   const rawSessionAdmin = req?.session?.adminUser;
