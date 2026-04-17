@@ -17,6 +17,8 @@ import ProductImage from '../admin/product-image'
 AdminJS.UserComponents.ProductImage = ProductImage
 import ProductImageUpload from '../admin/product-image-upload'
 AdminJS.UserComponents.ProductImageUpload = ProductImageUpload
+import ProductSizeStockInput from '../admin/product-size-stock-input'
+AdminJS.UserComponents.ProductSizeStockInput = ProductSizeStockInput
 import CategoryShow from '../admin/category-show'
 AdminJS.UserComponents.CategoryShow = CategoryShow
 import About from '../admin/about'
