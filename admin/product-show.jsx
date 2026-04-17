@@ -1,30 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const pageStyle = {
-  display: "grid",
-  gap: "18px",
-  color: "#e2e8f0",
+  minHeight: "100%",
+  padding: "24px",
+  color: "#111827",
+  background: "#ffffff",
 };
 
-const heroStyle = {
-  display: "grid",
-  gridTemplateColumns: "minmax(280px, 360px) 1fr",
-  gap: "18px",
-  alignItems: "stretch",
+const topBarStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "16px",
+  marginBottom: "18px",
+  flexWrap: "wrap",
 };
 
-const panelStyle = {
-  borderRadius: "20px",
-  border: "1px solid rgba(148, 163, 184, 0.18)",
-  background:
-    "linear-gradient(160deg, rgba(11, 26, 56, 0.96) 0%, rgba(9, 22, 47, 0.96) 100%)",
-  boxShadow: "0 20px 40px rgba(2, 6, 23, 0.24)",
+const backLinkStyle = {
+  color: "#111827",
+  textDecoration: "none",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  fontSize: "14px",
+  fontWeight: 700,
+};
+
+const layoutStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(320px, 1.05fr) minmax(360px, 0.95fr)",
+  gap: "18px",
+  alignItems: "start",
+};
+
+const cardStyle = {
+  borderRadius: "22px",
+  border: "1px solid rgba(17, 24, 39, 0.08)",
+  background: "#ffffff",
+  boxShadow: "0 18px 34px rgba(15, 23, 42, 0.08)",
   overflow: "hidden",
 };
 
+const imageCardStyle = {
+  ...cardStyle,
+  display: "grid",
+  gridTemplateRows: "1fr auto",
+  minHeight: "500px",
+};
+
 const imageWrapStyle = {
-  minHeight: "360px",
-  background: "#0f172a",
+  background: "#f8fafc",
+  minHeight: "340px",
+  display: "grid",
+  placeItems: "center",
 };
 
 const imageStyle = {
@@ -34,127 +62,156 @@ const imageStyle = {
   display: "block",
 };
 
-const heroBodyStyle = {
-  padding: "22px",
+const imageFallbackStyle = {
+  width: "100%",
+  height: "100%",
   display: "grid",
-  gap: "16px",
+  placeItems: "center",
+  color: "#64748b",
+  background: "linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)",
+  fontSize: "14px",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+};
+
+const imageFooterStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "12px",
+  padding: "16px 18px 18px",
+  background: "#ffffff",
+  borderTop: "1px solid rgba(17, 24, 39, 0.08)",
+  flexWrap: "wrap",
 };
 
 const titleStyle = {
   margin: 0,
-  fontSize: "clamp(28px, 4vw, 46px)",
-  lineHeight: 1.05,
-  color: "#f8fafc",
+  fontSize: "clamp(30px, 4vw, 54px)",
+  lineHeight: 1,
+  fontWeight: 800,
+  color: "#111827",
+  textTransform: "capitalize",
 };
 
 const subtitleStyle = {
-  margin: 0,
-  color: "#94a3b8",
+  margin: "8px 0 0",
+  color: "#6b7280",
   fontSize: "14px",
 };
 
-const badgeStyle = (active) => ({
+const pillStyle = (active) => ({
   display: "inline-flex",
   alignItems: "center",
+  gap: "8px",
   width: "fit-content",
-  padding: "6px 12px",
+  padding: "7px 12px",
   borderRadius: "999px",
   fontSize: "11px",
   fontWeight: 800,
-  letterSpacing: "0.08em",
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
   color: active ? "#14532d" : "#7f1d1d",
   background: active ? "#bbf7d0" : "#fecaca",
 });
 
-const statsGridStyle = {
+const pillDotStyle = (active) => ({
+  width: "8px",
+  height: "8px",
+  borderRadius: "999px",
+  background: active ? "#22c55e" : "#ef4444",
+});
+
+const infoGridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(3, minmax(160px, 1fr))",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   gap: "12px",
+  marginTop: "18px",
 };
 
-const statCardStyle = {
+const infoCardStyle = {
   borderRadius: "16px",
-  border: "1px solid rgba(148, 163, 184, 0.15)",
-  background: "rgba(15, 23, 42, 0.58)",
+  border: "1px solid rgba(17, 24, 39, 0.08)",
+  background: "#f8fafc",
   padding: "14px",
 };
 
-const statLabelStyle = {
+const infoLabelStyle = {
   fontSize: "11px",
   textTransform: "uppercase",
-  letterSpacing: "0.16em",
-  color: "#94a3b8",
+  letterSpacing: "0.18em",
+  color: "#6b7280",
   marginBottom: "8px",
 };
 
-const statValueStyle = {
-  fontSize: "16px",
+const infoValueStyle = {
+  fontSize: "17px",
   fontWeight: 700,
-  color: "#f8fafc",
+  color: "#111827",
   wordBreak: "break-word",
 };
 
-const sectionGridStyle = {
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1.4fr) minmax(280px, 0.9fr)",
-  gap: "18px",
+const contentCardStyle = {
+  ...cardStyle,
+  padding: "20px",
 };
 
 const sectionTitleStyle = {
   margin: 0,
-  fontSize: "14px",
+  fontSize: "13px",
   fontWeight: 800,
-  letterSpacing: "0.12em",
+  letterSpacing: "0.18em",
   textTransform: "uppercase",
-  color: "#f5df90",
+  color: "#111827",
 };
 
-const contentCardStyle = {
-  borderRadius: "20px",
-  border: "1px solid rgba(148, 163, 184, 0.18)",
-  background: "rgba(11, 26, 56, 0.9)",
-  padding: "18px",
-  boxShadow: "0 16px 28px rgba(2, 6, 23, 0.16)",
+const descriptionStyle = {
+  marginTop: "12px",
+  color: "#374151",
+  fontSize: "15px",
+  lineHeight: 1.8,
+  whiteSpace: "pre-wrap",
 };
 
-const infoListStyle = {
+const detailsGridStyle = {
   display: "grid",
-  gap: "12px",
+  gap: "10px",
+  marginTop: "12px",
 };
 
-const infoRowStyle = {
+const detailRowStyle = {
   display: "flex",
   justifyContent: "space-between",
   gap: "12px",
   paddingBottom: "10px",
-  borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+  borderBottom: "1px solid rgba(17, 24, 39, 0.08)",
 };
 
-const infoLabelStyle = {
-  color: "#94a3b8",
+const detailLabelStyle = {
+  color: "#6b7280",
   fontSize: "13px",
 };
 
-const infoValueStyle = {
-  color: "#f8fafc",
+const detailValueStyle = {
+  color: "#111827",
   fontWeight: 600,
   textAlign: "right",
   fontSize: "13px",
 };
 
-const descriptionStyle = {
-  color: "#cbd5e1",
-  lineHeight: 1.7,
-  fontSize: "14px",
-  whiteSpace: "pre-wrap",
+const actionRowStyle = {
+  display: "flex",
+  gap: "12px",
+  flexWrap: "wrap",
+  marginTop: "18px",
 };
 
-const buttonStyle = {
+const primaryButtonStyle = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
   gap: "8px",
-  width: "100%",
+  minWidth: "180px",
   padding: "14px 18px",
   borderRadius: "14px",
   border: "none",
@@ -163,14 +220,23 @@ const buttonStyle = {
   fontSize: "15px",
   fontWeight: 700,
   cursor: "pointer",
-  transition: "all 0.3s ease",
-  boxShadow: "0 8px 16px rgba(99, 102, 241, 0.3)",
+  boxShadow: "0 10px 18px rgba(99, 102, 241, 0.3)",
 };
 
-const buttonHoverStyle = {
-  ...buttonStyle,
-  transform: "translateY(-2px)",
-  boxShadow: "0 12px 24px rgba(99, 102, 241, 0.4)",
+const secondaryButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+  minWidth: "180px",
+  padding: "14px 18px",
+  borderRadius: "14px",
+  border: "1px solid rgba(17, 24, 39, 0.12)",
+  background: "#ffffff",
+  color: "#111827",
+  fontSize: "15px",
+  fontWeight: 700,
+  cursor: "pointer",
 };
 
 const formatCurrency = (value) => {
@@ -197,152 +263,453 @@ const formatDate = (value) => {
   });
 };
 
+const getProductImage = (params) => {
+  return (
+    params?.imageUrl ||
+    params?.image ||
+    params?.thumbnail ||
+    params?.cover ||
+    ""
+  );
+};
+
+const parseSizeStock = (value) => {
+  if (!value) {
+    return {};
+  }
+
+  let source = value;
+  if (typeof source === "string") {
+    try {
+      source = JSON.parse(source);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const [rawSize, rawQty] of Object.entries(source)) {
+    const size = String(rawSize || "")
+      .trim()
+      .toUpperCase();
+    if (!size) {
+      continue;
+    }
+
+    const qty = Number(rawQty);
+    if (!Number.isFinite(qty)) {
+      continue;
+    }
+
+    normalized[size] = Math.max(0, Math.trunc(qty));
+  }
+
+  return normalized;
+};
+
 const ProductShow = (props) => {
   const record = props?.record;
   const params = record?.params || {};
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [productData, setProductData] = useState(params);
 
-  const name = params?.name || "Unnamed product";
-  const sku = params?.sku || "-";
-  const category = params?.categoryId || "-";
-  const imageUrl = params?.imageUrl || "";
-  const stock = Number(params?.stock || 0);
-  const isActive = Boolean(params?.isActive);
-  const price = formatCurrency(params?.price);
+  const productId = params?.id || record?.id || "";
+  const name = productData?.name || "Unnamed product";
+  const sku = productData?.sku || "-";
+  const category = productData?.categoryId || "-";
+  const imageUrl = getProductImage(productData);
+  const stock = Number(productData?.stock || 0);
+  const sizeStock = parseSizeStock(productData?.sizeStock);
+  const sizeStockEntries = Object.entries(sizeStock);
+  const isActive = Boolean(productData?.isActive);
+  const price = formatCurrency(productData?.price);
   const description =
-    params?.description || "No description available for this product.";
+    productData?.description || "No description available for this product.";
 
-  const [buttonHovered, setButtonHovered] = React.useState(false);
+  const editUrl = productId
+    ? `/admin/resources/Products/records/${encodeURIComponent(String(productId))}/edit`
+    : "";
+
+  const orderUrl = productId
+    ? `/admin/resources/Orders/actions/new?productId=${encodeURIComponent(String(productId))}`
+    : "";
 
   const handleOrderClick = () => {
-    const productId = params?.id || record?.id || "";
-    const newOrderUrl = `/admin/resources/Orders/actions/new?productId=${encodeURIComponent(String(productId))}`;
-    window.location.assign(newOrderUrl);
+    if (orderUrl) {
+      window.location.assign(orderUrl);
+    }
   };
+
+  const handleEditClick = () => {
+    if (editUrl) {
+      window.location.assign(editUrl);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch fresh product data with sizeStock
+    if (productId) {
+      fetch(`/api/products/${productId}`, {
+        method: "GET",
+        credentials: "include",
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)
+        .then((data) => {
+          if (data?.id) {
+            setProductData(data);
+          }
+        });
+    }
+
+    // Fetch current user role
+    fetch("/admin/context/current-user", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        if (data?.role) {
+          setCurrentUserRole(data.role);
+        }
+      });
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    root.classList.add("change8-product-show-active");
+    body?.classList.add("change8-product-show-active");
+
+    return () => {
+      root.classList.remove("change8-product-show-active");
+      body?.classList.remove("change8-product-show-active");
+    };
+  }, [productId]);
 
   return (
     <div style={pageStyle}>
-      <style>
-        {`
-          @media (max-width: 980px) {
-            .change8-product-show-hero,
-            .change8-product-show-sections {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}
-      </style>
+      <style>{`
+        html.change8-product-show-active,
+        html.change8-product-show-active body,
+        html.change8-product-show-active #app,
+        html.change8-product-show-active .adminjs_Layout,
+        html.change8-product-show-active [data-testid="layout"],
+        html.change8-product-show-active [data-css="layout"],
+        html.change8-product-show-active main,
+        body.change8-product-show-active,
+        body.change8-product-show-active #app,
+        body.change8-product-show-active .adminjs_Layout,
+        body.change8-product-show-active [data-testid="layout"],
+        body.change8-product-show-active [data-css="layout"],
+        body.change8-product-show-active main {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          background-image: none !important;
+        }
 
-      <div className="change8-product-show-hero" style={heroStyle}>
-        <div style={panelStyle}>
-          <div style={imageWrapStyle}>
-            {imageUrl ? (
-              <img src={imageUrl} alt={name} style={imageStyle} />
-            ) : (
-              <div
-                style={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#94a3b8",
-                }}
-              >
-                No image available
-              </div>
-            )}
+        html.change8-product-show-active body::before,
+        html.change8-product-show-active::before,
+        body.change8-product-show-active::before {
+          content: none !important;
+          display: none !important;
+          background: none !important;
+          background-image: none !important;
+        }
+
+        html.change8-product-show-active [data-testid="sidebar"],
+        html.change8-product-show-active .adminjs_Sidebar,
+        html.change8-product-show-active section[data-css="sidebar"],
+        html.change8-product-show-active aside[data-css="sidebar"],
+        html.change8-product-show-active nav[data-css="sidebar"] {
+          display: none !important;
+          width: 0 !important;
+          min-width: 0 !important;
+          max-width: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          border: 0 !important;
+          overflow: hidden !important;
+          box-shadow: none !important;
+        }
+
+        html.change8-product-show-active .adminjs_Layout,
+        html.change8-product-show-active [data-testid="layout"],
+        html.change8-product-show-active [data-css="layout"] {
+          grid-template-columns: 1fr !important;
+        }
+
+        html.change8-product-show-active .adminjs_Layout > *:not([data-testid="sidebar"]),
+        html.change8-product-show-active [data-testid="layout"] > *:not([data-testid="sidebar"]),
+        html.change8-product-show-active [data-css="layout"] > *:not([data-testid="sidebar"]) {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        html.change8-product-show-active [data-testid="topbar"],
+        html.change8-product-show-active .adminjs_TopBar,
+        html.change8-product-show-active header[data-css="topbar"],
+        html.change8-product-show-active section[data-css="topbar"] {
+          display: none !important;
+        }
+
+        html:has(.change8-product-show-page),
+        body:has(.change8-product-show-page),
+        #app:has(.change8-product-show-page),
+        .adminjs_Layout:has(.change8-product-show-page),
+        [data-testid="layout"]:has(.change8-product-show-page),
+        [data-css="layout"]:has(.change8-product-show-page),
+        main:has(.change8-product-show-page) {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          background-image: none !important;
+        }
+
+        html:has(.change8-product-show-page) [data-testid="sidebar"],
+        html:has(.change8-product-show-page) .adminjs_Sidebar,
+        html:has(.change8-product-show-page) section[data-css="sidebar"],
+        html:has(.change8-product-show-page) aside[data-css="sidebar"],
+        html:has(.change8-product-show-page) nav[data-css="sidebar"] {
+          display: none !important;
+          width: 0 !important;
+          min-width: 0 !important;
+          max-width: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          border: 0 !important;
+          overflow: hidden !important;
+          box-shadow: none !important;
+        }
+
+        html:has(.change8-product-show-page) .adminjs_Layout,
+        html:has(.change8-product-show-page) [data-testid="layout"],
+        html:has(.change8-product-show-page) [data-css="layout"] {
+          grid-template-columns: 1fr !important;
+        }
+
+        html:has(.change8-product-show-page) .adminjs_Layout > *:not([data-testid="sidebar"]),
+        html:has(.change8-product-show-page) [data-testid="layout"] > *:not([data-testid="sidebar"]),
+        html:has(.change8-product-show-page) [data-css="layout"] > *:not([data-testid="sidebar"]) {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        html:has(.change8-product-show-page) [data-testid="topbar"],
+        html:has(.change8-product-show-page) .adminjs_TopBar,
+        html:has(.change8-product-show-page) header[data-css="topbar"],
+        html:has(.change8-product-show-page) section[data-css="topbar"] {
+          display: none !important;
+        }
+
+        .change8-product-show-shell {
+          display: grid;
+          gap: 18px;
+        }
+
+        .change8-product-show-meta-scroll {
+          max-height: 320px;
+          overflow-y: auto;
+          padding-right: 6px;
+        }
+
+        .change8-product-show-meta-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .change8-product-show-meta-scroll::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.8);
+          border-radius: 999px;
+        }
+
+        .change8-product-show-meta-scroll::-webkit-scrollbar-track {
+          background: rgba(241, 245, 249, 0.9);
+          border-radius: 999px;
+        }
+
+        @media (max-width: 1100px) {
+          .change8-product-show-layout {
+            grid-template-columns: 1fr !important;
+          }
+
+          .change8-product-show-info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+
+          .change8-product-show-meta-scroll {
+            max-height: none;
+            overflow-y: visible;
+            padding-right: 0;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .change8-product-show-info-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .change8-product-show-page {
+            padding: 16px !important;
+            background: #ffffff !important;
+          }
+        }
+      `}</style>
+
+      <div className="change8-product-show-shell change8-product-show-page">
+        <div style={topBarStyle}>
+          <a
+            href="/admin/resources/Products/actions/list"
+            style={backLinkStyle}
+          >
+            <span aria-hidden="true">‹</span>
+            Back to Products
+          </a>
+
+          <div style={pillStyle(isActive)}>
+            <span style={pillDotStyle(isActive)} />
+            {isActive ? "Active" : "Inactive"}
           </div>
         </div>
 
-        <div style={panelStyle}>
-          <div style={heroBodyStyle}>
-            <div>
+        <div className="change8-product-show-layout" style={layoutStyle}>
+          <section style={imageCardStyle}>
+            <div style={imageWrapStyle}>
+              {imageUrl ? (
+                <img src={imageUrl} alt={name} style={imageStyle} />
+              ) : (
+                <div style={imageFallbackStyle}>No image available</div>
+              )}
+            </div>
+
+            <div style={imageFooterStyle}>
+              <div>
+                <div style={{ color: "#64748b", fontSize: "12px" }}>
+                  Product ID
+                </div>
+                <div style={{ color: "#111827", fontWeight: 700 }}>
+                  {productId || "-"}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ color: "#64748b", fontSize: "12px" }}>Price</div>
+                <div style={{ color: "#111827", fontWeight: 700 }}>{price}</div>
+              </div>
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <div style={{ padding: "22px" }}>
               <h1 style={titleStyle}>{name}</h1>
               <p style={subtitleStyle}>
-                Clean product overview for quick review and management.
+                Clean product detail view with quick actions and record info.
               </p>
-            </div>
 
-            <div style={badgeStyle(isActive)}>
-              {isActive ? "ACTIVE" : "INACTIVE"}
-            </div>
+              <div
+                className="change8-product-show-info-grid"
+                style={infoGridStyle}
+              >
+                <div style={infoCardStyle}>
+                  <div style={infoLabelStyle}>Price</div>
+                  <div style={infoValueStyle}>{price}</div>
+                </div>
 
-            <div style={statsGridStyle}>
-              <div style={statCardStyle}>
-                <div style={statLabelStyle}>Price</div>
-                <div style={statValueStyle}>{price}</div>
+                <div style={infoCardStyle}>
+                  <div style={infoLabelStyle}>Stock</div>
+                  <div style={infoValueStyle}>{stock}</div>
+                </div>
+
+                <div style={infoCardStyle}>
+                  <div style={infoLabelStyle}>SKU</div>
+                  <div style={infoValueStyle}>{sku}</div>
+                </div>
+
+                <div style={infoCardStyle}>
+                  <div style={infoLabelStyle}>Sizes</div>
+                  <div style={infoValueStyle}>{sizeStockEntries.length}</div>
+                </div>
               </div>
-              <div style={statCardStyle}>
-                <div style={statLabelStyle}>Stock</div>
+
+              <div style={actionRowStyle}>
+                {currentUserRole !== "admin" && (
+                  <button
+                    type="button"
+                    style={primaryButtonStyle}
+                    onClick={handleOrderClick}
+                  >
+                    Create Order
+                  </button>
+                )}
 
                 <button
-                  style={buttonHovered ? buttonHoverStyle : buttonStyle}
-                  onMouseEnter={() => setButtonHovered(true)}
-                  onMouseLeave={() => setButtonHovered(false)}
-                  onClick={handleOrderClick}
-                  title="Click to create a new order for this product"
+                  type="button"
+                  style={secondaryButtonStyle}
+                  onClick={handleEditClick}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                  </svg>
-                  Order Now
+                  Edit Product
                 </button>
-                <div style={statValueStyle}>{stock}</div>
               </div>
-              <div style={statCardStyle}>
-                <div style={statLabelStyle}>SKU</div>
-                <div style={statValueStyle}>{sku}</div>
+
+              <div
+                className="change8-product-show-meta-scroll"
+                style={{
+                  marginTop: "22px",
+                  paddingTop: "20px",
+                  borderTop: "1px solid rgba(17, 24, 39, 0.08)",
+                  display: "grid",
+                  gap: "18px",
+                }}
+              >
+                <div>
+                  <h2 style={sectionTitleStyle}>Description</h2>
+                  <div style={descriptionStyle}>{description}</div>
+                </div>
+
+                <div>
+                  <h2 style={sectionTitleStyle}>Product Details</h2>
+                  <div style={detailsGridStyle}>
+                    <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Category</span>
+                      <span style={detailValueStyle}>{category}</span>
+                    </div>
+
+                    <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Size Stock</span>
+                      <span style={detailValueStyle}>
+                        {sizeStockEntries.length
+                          ? sizeStockEntries
+                              .map(([size, qty]) => `${size}: ${qty}`)
+                              .join(" | ")
+                          : "No size-wise stock"}
+                      </span>
+                    </div>
+
+                    <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Created At</span>
+                      <span style={detailValueStyle}>
+                        {formatDate(productData?.createdAt)}
+                      </span>
+                    </div>
+
+                    <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Updated At</span>
+                      <span style={detailValueStyle}>
+                        {formatDate(productData?.updatedAt)}
+                      </span>
+                    </div>
+
+                    <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Record ID</span>
+                      <span style={detailValueStyle}>{productId || "-"}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="change8-product-show-sections" style={sectionGridStyle}>
-        <div style={contentCardStyle}>
-          <h2 style={sectionTitleStyle}>Description</h2>
-          <div style={{ height: 12 }} />
-          <div style={descriptionStyle}>{description}</div>
-        </div>
-
-        <div style={contentCardStyle}>
-          <h2 style={sectionTitleStyle}>Product Details</h2>
-          <div style={{ height: 12 }} />
-          <div style={infoListStyle}>
-            <div style={infoRowStyle}>
-              <span style={infoLabelStyle}>Category</span>
-              <span style={infoValueStyle}>{category}</span>
-            </div>
-            <div style={infoRowStyle}>
-              <span style={infoLabelStyle}>Created At</span>
-              <span style={infoValueStyle}>
-                {formatDate(params?.createdAt)}
-              </span>
-            </div>
-            <div style={infoRowStyle}>
-              <span style={infoLabelStyle}>Updated At</span>
-              <span style={infoValueStyle}>
-                {formatDate(params?.updatedAt)}
-              </span>
-            </div>
-            <div style={infoRowStyle}>
-              <span style={infoLabelStyle}>Record ID</span>
-              <span style={infoValueStyle}>
-                {params?.id || record?.id || "-"}
-              </span>
-            </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>

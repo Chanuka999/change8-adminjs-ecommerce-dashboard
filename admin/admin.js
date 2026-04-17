@@ -35,6 +35,169 @@ const shopNavigation = {
   icon: "Store",
 };
 
+const slugify = (value) => {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+const parseSizeStock = (rawValue) => {
+  if (rawValue === undefined || rawValue === null || rawValue === "") {
+    return {};
+  }
+
+  let source = rawValue;
+  if (typeof source === "string") {
+    const trimmed = source.trim();
+    if (!trimmed) {
+      return {};
+    }
+
+    try {
+      source = JSON.parse(trimmed);
+    } catch {
+      throw new Error("Size stock format is invalid");
+    }
+  }
+
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    throw new Error("Size stock must be an object");
+  }
+
+  const normalized = {};
+
+  for (const [rawSize, rawQty] of Object.entries(source)) {
+    const size = String(rawSize || "")
+      .trim()
+      .toUpperCase();
+
+    if (!size) {
+      continue;
+    }
+
+    const qty = Number(rawQty);
+    if (!Number.isFinite(qty)) {
+      throw new Error(`Invalid stock value for size ${size}`);
+    }
+
+    if (qty < 0) {
+      throw new Error(`Stock cannot be negative for size ${size}`);
+    }
+
+    normalized[size] = Math.trunc(qty);
+  }
+
+  return normalized;
+};
+
+const sanitizeProductPayload = (request) => {
+  if (request?.method !== "post") {
+    return request;
+  }
+
+  const payload = { ...(request.payload || {}) };
+
+  const rawCategoryId =
+    payload.categoryId ??
+    payload["category.id"] ??
+    payload["categoryId.id"] ??
+    payload?.category?.id ??
+    null;
+  const categoryId = Number(rawCategoryId);
+  if (!Number.isFinite(categoryId) || categoryId <= 0) {
+    throw new Error("Category is required for product");
+  }
+
+  payload.categoryId = categoryId;
+
+  if (typeof payload.name === "string") {
+    payload.name = payload.name.trim();
+  }
+
+  if (typeof payload.sku === "string") {
+    payload.sku = payload.sku.trim();
+  }
+
+  if (!payload.name) {
+    throw new Error("Product name is required");
+  }
+
+  if (!payload.sku) {
+    throw new Error("SKU is required");
+  }
+
+  if (payload.price === "") {
+    payload.price = 0;
+  }
+
+  if (payload.stock === "") {
+    payload.stock = 0;
+  }
+
+  if (payload.price !== undefined && payload.price !== null) {
+    const price = Number(payload.price);
+    if (!Number.isFinite(price)) {
+      throw new Error("Price must be a valid number");
+    }
+    payload.price = price;
+  }
+
+  if (payload.stock !== undefined && payload.stock !== null) {
+    const stock = Number(payload.stock);
+    if (!Number.isFinite(stock)) {
+      throw new Error("Stock must be a valid number");
+    }
+    payload.stock = stock;
+  }
+
+  if (payload.imageUrl === "") {
+    payload.imageUrl = null;
+  }
+
+  if (payload.imagePublicId === "") {
+    payload.imagePublicId = null;
+  }
+
+  if (payload.uploadImage === "") {
+    delete payload.uploadImage;
+  }
+
+  const sizeStockPayload =
+    payload.sizeStockText !== undefined
+      ? payload.sizeStockText
+      : payload.sizeStock;
+  const parsedSizeStock = parseSizeStock(sizeStockPayload);
+  payload.sizeStock = parsedSizeStock;
+
+  if (Object.keys(parsedSizeStock).length > 0) {
+    payload.stock = Object.values(parsedSizeStock).reduce(
+      (sum, qty) => sum + Number(qty || 0),
+      0,
+    );
+  } else {
+    // If no sizeStock defined, ensure stock is at least 0
+    if (payload.stock === undefined || payload.stock === null) {
+      payload.stock = 0;
+    }
+  }
+
+  // uploadImage is a virtual AdminJS field; never persist it.
+  for (const key of Object.keys(payload)) {
+    if (key === "uploadImage" || key.startsWith("uploadImage.")) {
+      delete payload[key];
+    }
+
+    if (key === "sizeStockText" || key.startsWith("sizeStockText.")) {
+      delete payload[key];
+    }
+  }
+
+  request.payload = payload;
+  return request;
+};
+
 // register adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
@@ -78,10 +241,15 @@ const Components = {
     "ProductImageUpload",
     path.join(__dirname, "product-image-upload.jsx"),
   ),
+  ProductSizeStockInput: componentLoader.add(
+    "ProductSizeStockInput",
+    path.join(__dirname, "product-size-stock-input.jsx"),
+  ),
   CategoryShow: componentLoader.add(
     "CategoryShow",
     path.join(__dirname, "category-show.jsx"),
   ),
+  About: componentLoader.add("About", path.join(__dirname, "about.jsx")),
 };
 
 const productResource = {
@@ -90,14 +258,14 @@ const productResource = {
     navigation: shopNavigation,
     actions: {
       list: {
-        component: Components.ProductCardsList,
+        isAccessible: isAdmin,
       },
       show: {
         isAccessible: () => true,
         component: Components.ProductShow,
       },
-      new: { isAccessible: isAdmin },
-      edit: { isAccessible: isAdmin },
+      new: { isAccessible: isAdmin, before: sanitizeProductPayload },
+      edit: { isAccessible: isAdmin, before: sanitizeProductPayload },
       delete: { isAccessible: isAdmin },
       bulkDelete: { isAccessible: isAdmin },
     },
@@ -116,6 +284,7 @@ const productResource = {
       "categoryId",
       "isActive",
       "imageUrl",
+      "sizeStock",
       "stock",
       "price",
       "description",
@@ -129,12 +298,16 @@ const productResource = {
       "isActive",
       "uploadImage",
       "imagePublicId",
-      "stock",
+      "sizeStockText",
       "price",
       "description",
     ],
     filterProperties: ["name", "categoryId", "isActive", "stock", "price"],
     properties: {
+      categoryId: {
+        reference: "Categories",
+        isRequired: true,
+      },
       uploadImage: {
         type: "string",
         isVisible: {
@@ -170,6 +343,28 @@ const productResource = {
           edit: false,
         },
       },
+      sizeStock: {
+        type: "mixed",
+        isVisible: {
+          list: false,
+          filter: false,
+          show: true,
+          edit: false,
+        },
+      },
+      sizeStockText: {
+        type: "string",
+        isVisible: {
+          list: false,
+          filter: false,
+          show: false,
+          edit: true,
+        },
+        label: "Sizes & Stock",
+        components: {
+          edit: Components.ProductSizeStockInput,
+        },
+      },
     },
   },
 };
@@ -192,8 +387,8 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=11.5"],
-    scripts: ["/custom/admin-theme.js?v=12.5"],
+    styles: ["/custom/admin-theme.css?v=11.14"],
+    scripts: ["/custom/admin-theme.js?v=13.5"],
   },
   dashboard: {
     component: Components.Dashboard,
@@ -248,6 +443,12 @@ const admin = new AdminJS({
       };
     },
   },
+  pages: {
+    About: {
+      label: "About",
+      component: Components.About,
+    },
+  },
   resources: [
     {
       resource: User,
@@ -261,8 +462,34 @@ const admin = new AdminJS({
           show: {
             component: Components.CategoryShow,
           },
-          new: { isAccessible: isAdmin },
-          edit: { isAccessible: isAdmin },
+          new: {
+            isAccessible: isAdmin,
+            before: async (request) => {
+              if (request?.method === "post") {
+                const payload = { ...(request.payload || {}) };
+                if (!payload.slug && payload.name) {
+                  payload.slug = slugify(payload.name);
+                }
+                request.payload = payload;
+              }
+
+              return request;
+            },
+          },
+          edit: {
+            isAccessible: isAdmin,
+            before: async (request) => {
+              if (request?.method === "post") {
+                const payload = { ...(request.payload || {}) };
+                if (!payload.slug && payload.name) {
+                  payload.slug = slugify(payload.name);
+                }
+                request.payload = payload;
+              }
+
+              return request;
+            },
+          },
           delete: { isAccessible: isAdmin },
           bulkDelete: { isAccessible: isAdmin },
         },
@@ -343,6 +570,43 @@ const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
   cookiePassword: "secretcookie",
 });
 
+router.get("/context/current-user", async (req, res) => {
+  try {
+    const rawSessionAdmin = req?.session?.adminUser;
+    const sessionAdmin =
+      typeof rawSessionAdmin === "string"
+        ? JSON.parse(rawSessionAdmin)
+        : rawSessionAdmin;
+
+    if (!sessionAdmin?.email && !sessionAdmin?.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          sessionAdmin?.id ? { id: Number(sessionAdmin.id) } : null,
+          sessionAdmin?.email ? { email: sessionAdmin.email } : null,
+        ].filter(Boolean),
+      },
+      attributes: ["id", "name", "email", "role"],
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Current user not found" });
+    }
+
+    return res.json({
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email,
+      role: currentUser.role,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/context/order-create", async (req, res) => {
   try {
     const rawSessionAdmin = req?.session?.adminUser;
@@ -379,13 +643,31 @@ router.get("/context/order-create", async (req, res) => {
           })
         : Promise.resolve([currentUser]),
       Product.findAll({
-        attributes: ["id", "name", "sku", "price", "imageUrl", "isActive"],
+        attributes: [
+          "id",
+          "name",
+          "sku",
+          "price",
+          "imageUrl",
+          "isActive",
+          "stock",
+          "sizeStock",
+        ],
         order: [["id", "DESC"]],
       }),
       Order.findAll({ attributes: ["userId"], raw: true }),
       productId
         ? Product.findByPk(productId, {
-            attributes: ["id", "name", "sku", "price", "imageUrl", "isActive"],
+            attributes: [
+              "id",
+              "name",
+              "sku",
+              "price",
+              "imageUrl",
+              "isActive",
+              "stock",
+              "sizeStock",
+            ],
           })
         : Promise.resolve(null),
     ]);
@@ -468,6 +750,119 @@ router.post("/context/order-create/submit", async (req, res) => {
       return res.status(400).json({ message: "Customer is required" });
     }
 
+    const normalizedItems = lineItems
+      .map((item) => {
+        const quantity = Math.max(1, Number(item.quantity || 1));
+        const unitPrice = Math.max(0, Number(item.unitPrice || 0));
+        const totalPrice = quantity * unitPrice;
+
+        return {
+          productId: Number(item.productId || 0),
+          size: item.size ? String(item.size).trim().toUpperCase() : null,
+          quantity,
+          unitPrice,
+          totalPrice,
+        };
+      })
+      .filter((item) => item.productId > 0);
+
+    if (!normalizedItems.length) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Valid line items are required" });
+    }
+
+    const productIds = Array.from(
+      new Set(normalizedItems.map((item) => Number(item.productId))),
+    );
+
+    const products = await Product.findAll({
+      where: { id: productIds },
+      attributes: ["id", "name", "stock", "sizeStock"],
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+
+    const productMap = new Map(
+      products.map((product) => [Number(product.id), product]),
+    );
+
+    for (const item of normalizedItems) {
+      const product = productMap.get(Number(item.productId));
+      if (!product) {
+        await transaction.rollback();
+        return res
+          .status(400)
+          .json({ message: "One or more products are invalid" });
+      }
+
+      const rawSizeStock = product.get("sizeStock");
+      const parsedSizeStock =
+        rawSizeStock &&
+        typeof rawSizeStock === "object" &&
+        !Array.isArray(rawSizeStock)
+          ? { ...rawSizeStock }
+          : {};
+      const sizeKeys = Object.keys(parsedSizeStock);
+
+      if (sizeKeys.length > 0) {
+        const selectedSize = String(item.size || "")
+          .trim()
+          .toUpperCase();
+
+        if (!selectedSize) {
+          await transaction.rollback();
+          return res.status(400).json({
+            message: `Please select a size for ${product.get("name") || "the selected product"}`,
+          });
+        }
+
+        if (
+          !Object.prototype.hasOwnProperty.call(parsedSizeStock, selectedSize)
+        ) {
+          await transaction.rollback();
+          return res.status(400).json({
+            message: `Size ${selectedSize} is not available for ${product.get("name") || "the selected product"}`,
+          });
+        }
+
+        const availableQty = Math.max(
+          0,
+          Number(parsedSizeStock[selectedSize] || 0),
+        );
+        if (item.quantity > availableQty) {
+          await transaction.rollback();
+          return res.status(400).json({
+            message: `${product.get("name") || "Product"} (${selectedSize}) has only ${availableQty} in stock`,
+          });
+        }
+
+        parsedSizeStock[selectedSize] = availableQty - item.quantity;
+        const recalculatedStock = Object.values(parsedSizeStock).reduce(
+          (sum, qty) => sum + Math.max(0, Number(qty || 0)),
+          0,
+        );
+
+        product.set("sizeStock", parsedSizeStock);
+        product.set("stock", recalculatedStock);
+      } else {
+        const currentStock = Math.max(0, Number(product.get("stock") || 0));
+        if (item.quantity > currentStock) {
+          await transaction.rollback();
+          return res.status(400).json({
+            message: `${product.get("name") || "Product"} has only ${currentStock} in stock`,
+          });
+        }
+
+        product.set("stock", currentStock - item.quantity);
+      }
+    }
+
+    await Promise.all(
+      Array.from(productMap.values()).map(async (product) => {
+        await product.save({ transaction });
+      }),
+    );
+
     const order = await Order.create(
       {
         userId: resolvedUserId,
@@ -489,29 +884,17 @@ router.post("/context/order-create/submit", async (req, res) => {
       { transaction },
     );
 
-    const normalizedItems = lineItems
-      .map((item) => {
-        const quantity = Math.max(1, Number(item.quantity || 1));
-        const unitPrice = Math.max(0, Number(item.unitPrice || 0));
-        const totalPrice = quantity * unitPrice;
-
-        return {
-          orderId: order.id,
-          productId: Number(item.productId || 0),
-          size: item.size ? String(item.size).trim() : null,
-          quantity,
-          unitPrice,
-          totalPrice,
-        };
-      })
-      .filter((item) => item.productId > 0);
-
-    if (!normalizedItems.length) {
-      await transaction.rollback();
-      return res.status(400).json({ message: "Valid line items are required" });
-    }
-
-    await OrderItem.bulkCreate(normalizedItems, { transaction });
+    await OrderItem.bulkCreate(
+      normalizedItems.map((item) => ({
+        orderId: order.id,
+        productId: item.productId,
+        size: item.size,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+      })),
+      { transaction },
+    );
 
     await transaction.commit();
     return res.status(201).json({ id: order.id });

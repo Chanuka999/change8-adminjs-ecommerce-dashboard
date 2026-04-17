@@ -68,6 +68,45 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
+const normalizeSizeStock = (rawValue) => {
+  if (!rawValue) {
+    return {};
+  }
+
+  let source = rawValue;
+  if (typeof source === "string") {
+    try {
+      source = JSON.parse(source);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    return {};
+  }
+
+  const normalized = {};
+
+  for (const [rawSize, rawQty] of Object.entries(source)) {
+    const size = String(rawSize || "")
+      .trim()
+      .toUpperCase();
+    if (!size) {
+      continue;
+    }
+
+    const qty = Number(rawQty);
+    if (!Number.isFinite(qty)) {
+      continue;
+    }
+
+    normalized[size] = Math.max(0, Math.trunc(qty));
+  }
+
+  return normalized;
+};
+
 const Product = sequelize.define(
   "Product",
   {
@@ -94,6 +133,11 @@ const Product = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
+    sizeStock: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
     imageUrl: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -116,6 +160,19 @@ const Product = sequelize.define(
     timestamps: true,
   },
 );
+
+Product.beforeValidate((product) => {
+  const normalizedSizeStock = normalizeSizeStock(product.get("sizeStock"));
+  product.set("sizeStock", normalizedSizeStock);
+
+  if (Object.keys(normalizedSizeStock).length > 0) {
+    const totalStock = Object.values(normalizedSizeStock).reduce(
+      (sum, qty) => sum + Number(qty || 0),
+      0,
+    );
+    product.set("stock", totalStock);
+  }
+});
 
 Product.beforeUpdate(async (product) => {
   const oldPublicId =

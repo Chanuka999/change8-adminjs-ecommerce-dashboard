@@ -65,7 +65,6 @@ const ProductImageUpload = (props) => {
       setPublicId(uploadedPublicId);
       onChange?.("imageUrl", uploadedUrl);
       onChange?.("imagePublicId", uploadedPublicId);
-      onChange?.("uploadImage", uploadedUrl);
     } catch (uploadError) {
       setError(uploadError.message);
     } finally {
@@ -79,7 +78,6 @@ const ProductImageUpload = (props) => {
     setPublicId("");
     onChange?.("imageUrl", "");
     onChange?.("imagePublicId", "");
-    onChange?.("uploadImage", "");
   };
 
   return (

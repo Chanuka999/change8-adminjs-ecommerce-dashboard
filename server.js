@@ -24,6 +24,34 @@ app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
+app.use("/admin", (req, res, next) => {
+  const rawSessionAdmin = req?.session?.adminUser;
+  const sessionAdmin =
+    typeof rawSessionAdmin === "string"
+      ? (() => {
+          try {
+            return JSON.parse(rawSessionAdmin);
+          } catch (error) {
+            return null;
+          }
+        })()
+      : rawSessionAdmin;
+
+  const role = String(sessionAdmin?.role || "").toLowerCase();
+
+  if (role === "admin" || role === "user") {
+    res.cookie("change8_admin_role", role, {
+      httpOnly: false,
+      sameSite: "lax",
+      path: "/admin",
+    });
+  } else {
+    res.clearCookie("change8_admin_role", { path: "/admin" });
+  }
+
+  next();
+});
+
 // AdminJS route
 app.get("/admin/register", (req, res) => {
   res.send(`<!doctype html>
