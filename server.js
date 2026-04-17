@@ -27,21 +27,37 @@ const isServerlessRuntime =
   String(process.env.AWS_REGION || "").trim().length > 0;
 
 let adminRouter;
+let adminInitErrorMessage = "";
 
 try {
   const adminModule = await import("./admin/admin.js");
   adminRouter = adminModule.default;
 } catch (error) {
+  adminInitErrorMessage = String(error?.message || error || "Unknown error");
   console.error(
     "AdminJS router initialization failed:",
-    error?.message || error,
+    adminInitErrorMessage,
   );
 
   adminRouter = express.Router();
   adminRouter.use((_req, res) => {
-    return res
-      .status(503)
-      .send("Admin panel is temporarily unavailable. Check server logs.");
+    return res.status(503).send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Unavailable</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; color: #0f172a; }
+      pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h2>Admin panel is temporarily unavailable.</h2>
+    <p>Initialization error:</p>
+    <pre>${adminInitErrorMessage.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  </body>
+</html>`);
   });
 }
 
