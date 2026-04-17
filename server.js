@@ -58,6 +58,30 @@ app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
+app.get("/", (_req, res) => {
+  return res.status(200).send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Change8 API</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 40px; color: #0f172a; }
+      h1 { margin-bottom: 8px; }
+      code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1>Change8 Backend Is Running</h1>
+    <p>API is live. Try <code>/api/products</code> or <code>/api/login</code>.</p>
+  </body>
+</html>`);
+});
+
+app.get("/health", (_req, res) => {
+  return res.status(200).json({ ok: true, service: "change8-api" });
+});
+
 app.get("/admin/frontend/assets/components.bundle.js", (_req, res) => {
   const bundlePath = path.join(__dirname, ".adminjs", "bundle.js");
 
