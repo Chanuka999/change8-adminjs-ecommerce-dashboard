@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const pageStyle = {
   minHeight: "100%",
@@ -273,20 +273,62 @@ const getProductImage = (params) => {
   );
 };
 
+const parseSizeStock = (value) => {
+  if (!value) {
+    return {};
+  }
+
+  let source = value;
+  if (typeof source === "string") {
+    try {
+      source = JSON.parse(source);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!source || typeof source !== "object" || Array.isArray(source)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const [rawSize, rawQty] of Object.entries(source)) {
+    const size = String(rawSize || "")
+      .trim()
+      .toUpperCase();
+    if (!size) {
+      continue;
+    }
+
+    const qty = Number(rawQty);
+    if (!Number.isFinite(qty)) {
+      continue;
+    }
+
+    normalized[size] = Math.max(0, Math.trunc(qty));
+  }
+
+  return normalized;
+};
+
 const ProductShow = (props) => {
   const record = props?.record;
   const params = record?.params || {};
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [productData, setProductData] = useState(params);
 
   const productId = params?.id || record?.id || "";
-  const name = params?.name || "Unnamed product";
-  const sku = params?.sku || "-";
-  const category = params?.categoryId || "-";
-  const imageUrl = getProductImage(params);
-  const stock = Number(params?.stock || 0);
-  const isActive = Boolean(params?.isActive);
-  const price = formatCurrency(params?.price);
+  const name = productData?.name || "Unnamed product";
+  const sku = productData?.sku || "-";
+  const category = productData?.categoryId || "-";
+  const imageUrl = getProductImage(productData);
+  const stock = Number(productData?.stock || 0);
+  const sizeStock = parseSizeStock(productData?.sizeStock);
+  const sizeStockEntries = Object.entries(sizeStock);
+  const isActive = Boolean(productData?.isActive);
+  const price = formatCurrency(productData?.price);
   const description =
-    params?.description || "No description available for this product.";
+    productData?.description || "No description available for this product.";
 
   const editUrl = productId
     ? `/admin/resources/Products/records/${encodeURIComponent(String(productId))}/edit`
@@ -309,6 +351,34 @@ const ProductShow = (props) => {
   };
 
   useEffect(() => {
+    // Fetch fresh product data with sizeStock
+    if (productId) {
+      fetch(`/api/products/${productId}`, {
+        method: "GET",
+        credentials: "include",
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)
+        .then((data) => {
+          if (data?.id) {
+            setProductData(data);
+          }
+        });
+    }
+
+    // Fetch current user role
+    fetch("/admin/context/current-user", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data) => {
+        if (data?.role) {
+          setCurrentUserRole(data.role);
+        }
+      });
+
     const root = document.documentElement;
     const body = document.body;
 
@@ -319,7 +389,7 @@ const ProductShow = (props) => {
       root.classList.remove("change8-product-show-active");
       body?.classList.remove("change8-product-show-active");
     };
-  }, []);
+  }, [productId]);
 
   return (
     <div style={pageStyle}>
@@ -556,16 +626,23 @@ const ProductShow = (props) => {
                   <div style={infoLabelStyle}>SKU</div>
                   <div style={infoValueStyle}>{sku}</div>
                 </div>
+
+                <div style={infoCardStyle}>
+                  <div style={infoLabelStyle}>Sizes</div>
+                  <div style={infoValueStyle}>{sizeStockEntries.length}</div>
+                </div>
               </div>
 
               <div style={actionRowStyle}>
-                <button
-                  type="button"
-                  style={primaryButtonStyle}
-                  onClick={handleOrderClick}
-                >
-                  Create Order
-                </button>
+                {currentUserRole !== "admin" && (
+                  <button
+                    type="button"
+                    style={primaryButtonStyle}
+                    onClick={handleOrderClick}
+                  >
+                    Create Order
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -600,16 +677,27 @@ const ProductShow = (props) => {
                     </div>
 
                     <div style={detailRowStyle}>
+                      <span style={detailLabelStyle}>Size Stock</span>
+                      <span style={detailValueStyle}>
+                        {sizeStockEntries.length
+                          ? sizeStockEntries
+                              .map(([size, qty]) => `${size}: ${qty}`)
+                              .join(" | ")
+                          : "No size-wise stock"}
+                      </span>
+                    </div>
+
+                    <div style={detailRowStyle}>
                       <span style={detailLabelStyle}>Created At</span>
                       <span style={detailValueStyle}>
-                        {formatDate(params?.createdAt)}
+                        {formatDate(productData?.createdAt)}
                       </span>
                     </div>
 
                     <div style={detailRowStyle}>
                       <span style={detailLabelStyle}>Updated At</span>
                       <span style={detailValueStyle}>
-                        {formatDate(params?.updatedAt)}
+                        {formatDate(productData?.updatedAt)}
                       </span>
                     </div>
 
