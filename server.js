@@ -26,13 +26,13 @@ const isServerlessRuntime =
 let adminRouter = express.Router();
 
 if (isServerlessRuntime) {
-  adminRouter.get("*", (_req, res) => {
+  adminRouter.use((_req, res) => {
     return res
       .status(503)
       .send("Admin panel is disabled in serverless deployment.");
   });
 } else {
-  adminRouter.get("*", (_req, res) => {
+  adminRouter.use((_req, res) => {
     return res
       .status(503)
       .send("Admin panel is starting. Please refresh in a moment.");
@@ -49,7 +49,7 @@ if (isServerlessRuntime) {
       );
 
       adminRouter = express.Router();
-      adminRouter.get("*", (_req, res) => {
+      adminRouter.use((_req, res) => {
         return res
           .status(503)
           .send("Admin panel is temporarily unavailable. Check server logs.");
