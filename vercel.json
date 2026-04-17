@@ -2,14 +2,7 @@
   "installCommand": "npm install --include=optional",
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "node_modules/{pg,pg-hstore,@rollup/rollup-linux-x64-gnu,rollup}/**",
-        "node_modules/adminjs/lib/frontend/assets/**",
-        "node_modules/@adminjs/design-system/**",
-        "admin-assets/**",
-        "public/**",
-        ".adminjs/**"
-      ]
+      "includeFiles": "{node_modules/{pg,pg-hstore,@rollup/rollup-linux-x64-gnu,rollup,adminjs,@adminjs}/**,admin-assets/**,public/**,.adminjs/**}"
     }
   },
   "rewrites": [
