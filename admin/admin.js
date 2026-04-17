@@ -530,6 +530,9 @@ const admin = new AdminJS({
 
 const isServerlessRuntime =
   process.env.VERCEL === "1" ||
+  String(process.env.VERCEL_ENV || "").trim().length > 0 ||
+  String(process.env.VERCEL_URL || "").trim().length > 0 ||
+  String(process.env.NOW_REGION || "").trim().length > 0 ||
   String(process.env.AWS_REGION || "").trim().length > 0;
 
 if (!isServerlessRuntime) {
