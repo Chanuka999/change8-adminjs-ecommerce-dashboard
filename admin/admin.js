@@ -3,6 +3,8 @@ import AdminJSExpress from "@adminjs/express";
 import AdminJSSequelize from "@adminjs/sequelize";
 import { Op } from "sequelize";
 import bcrypt from "bcrypt";
+import session from "express-session";
+import connectSessionSequelize from "connect-session-sequelize";
 import { fileURLToPath } from "url";
 import path from "path";
 
@@ -537,43 +539,79 @@ if (shouldWatchAdmin) {
   admin.watch();
 }
 
-const router = AdminJSExpress.buildAuthenticatedRouter(admin, {
-  authenticate: async (email, password) => {
-    const normalizedEmail = String(email || "")
-      .trim()
-      .toLowerCase();
-    const rawPassword = String(password || "");
-
-    if (!normalizedEmail || !rawPassword) {
-      return null;
-    }
-
-    const user = await User.findOne({
-      where: sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("email")),
-        normalizedEmail,
-      ),
-    });
-
-    if (!user || !(user.role === "admin" || user.role === "user")) {
-      return null;
-    }
-
-    // Accept bcrypt hashed passwords and legacy plain-text values.
-    const isBcryptMatch = await bcrypt
-      .compare(rawPassword, user.password)
-      .catch(() => false);
-    const isLegacyPlainMatch = user.password === rawPassword;
-
-    if (!isBcryptMatch && !isLegacyPlainMatch) {
-      return null;
-    }
-
-    return user;
-  },
-  cookieName: "adminjs",
-  cookiePassword: "secretcookie",
+const SequelizeSessionStore = connectSessionSequelize(session.Store);
+const sessionStore = new SequelizeSessionStore({
+  db: sequelize,
+  tableName: "AdminSessions",
+  checkExpirationInterval: 15 * 60 * 1000,
+  expiration: 12 * 60 * 60 * 1000,
 });
+
+sessionStore.sync().catch((error) => {
+  console.error("Admin session store sync failed:", error?.message || error);
+});
+
+const adminCookieSecret =
+  process.env.SESSION_SECRET ||
+  process.env.JWT_SECRET ||
+  "change8-admin-cookie-secret";
+
+const router = AdminJSExpress.buildAuthenticatedRouter(
+  admin,
+  {
+    authenticate: async (email, password) => {
+      const normalizedEmail = String(email || "")
+        .trim()
+        .toLowerCase();
+      const rawPassword = String(password || "");
+
+      if (!normalizedEmail || !rawPassword) {
+        return null;
+      }
+
+      const user = await User.findOne({
+        where: sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("email")),
+          normalizedEmail,
+        ),
+      });
+
+      if (!user || !(user.role === "admin" || user.role === "user")) {
+        return null;
+      }
+
+      // Accept bcrypt hashed passwords and legacy plain-text values.
+      const isBcryptMatch = await bcrypt
+        .compare(rawPassword, user.password)
+        .catch(() => false);
+      const isLegacyPlainMatch = user.password === rawPassword;
+
+      if (!isBcryptMatch && !isLegacyPlainMatch) {
+        return null;
+      }
+
+      return user;
+    },
+    cookieName: "adminjs",
+    cookiePassword: adminCookieSecret,
+  },
+  null,
+  {
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    proxy: true,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure:
+        String(process.env.NODE_ENV || "")
+          .trim()
+          .toLowerCase() === "production",
+      maxAge: 12 * 60 * 60 * 1000,
+    },
+  },
+);
 
 router.get("/context/current-user", async (req, res) => {
   try {
