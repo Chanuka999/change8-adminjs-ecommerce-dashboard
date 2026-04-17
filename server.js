@@ -19,22 +19,33 @@ dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const isServerlessRuntime =
+  process.env.VERCEL === "1" ||
+  String(process.env.AWS_REGION || "").trim().length > 0;
 
 let adminRouter = express.Router();
 
-try {
-  const adminModule = await import("./admin/admin.js");
-  adminRouter = adminModule.default;
-} catch (error) {
-  console.error(
-    "AdminJS router initialization failed:",
-    error?.message || error,
-  );
+if (!isServerlessRuntime) {
+  try {
+    const adminModule = await import("./admin/admin.js");
+    adminRouter = adminModule.default;
+  } catch (error) {
+    console.error(
+      "AdminJS router initialization failed:",
+      error?.message || error,
+    );
 
+    adminRouter.get("*", (_req, res) => {
+      return res
+        .status(503)
+        .send("Admin panel is temporarily unavailable. Check server logs.");
+    });
+  }
+} else {
   adminRouter.get("*", (_req, res) => {
     return res
       .status(503)
-      .send("Admin panel is temporarily unavailable. Check server logs.");
+      .send("Admin panel is disabled in serverless deployment.");
   });
 }
 
@@ -433,10 +444,6 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/uploads", uploadRoutes);
-
-const isServerlessRuntime =
-  process.env.VERCEL === "1" ||
-  String(process.env.AWS_REGION || "").trim().length > 0;
 
 if (!isServerlessRuntime) {
   sequelize
