@@ -417,9 +417,11 @@ app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/uploads", uploadRoutes);
 
-const isVercelRuntime = process.env.VERCEL === "1";
+const isServerlessRuntime =
+  process.env.VERCEL === "1" ||
+  String(process.env.AWS_REGION || "").trim().length > 0;
 
-if (!isVercelRuntime) {
+if (!isServerlessRuntime) {
   sequelize
     .sync({ alter: { drop: false } })
     .then(() => {
