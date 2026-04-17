@@ -23,38 +23,32 @@ const isServerlessRuntime =
   process.env.VERCEL === "1" ||
   String(process.env.AWS_REGION || "").trim().length > 0;
 
-let adminRouter = express.Router();
+let adminRouter;
 
 if (isServerlessRuntime) {
+  adminRouter = express.Router();
   adminRouter.use((_req, res) => {
     return res
       .status(503)
       .send("Admin panel is disabled in serverless deployment.");
   });
 } else {
-  adminRouter.use((_req, res) => {
-    return res
-      .status(503)
-      .send("Admin panel is starting. Please refresh in a moment.");
-  });
+  try {
+    const adminModule = await import("./admin/admin.js");
+    adminRouter = adminModule.default;
+  } catch (error) {
+    console.error(
+      "AdminJS router initialization failed:",
+      error?.message || error,
+    );
 
-  import("./admin/admin.js")
-    .then((adminModule) => {
-      adminRouter = adminModule.default;
-    })
-    .catch((error) => {
-      console.error(
-        "AdminJS router initialization failed:",
-        error?.message || error,
-      );
-
-      adminRouter = express.Router();
-      adminRouter.use((_req, res) => {
-        return res
-          .status(503)
-          .send("Admin panel is temporarily unavailable. Check server logs.");
-      });
+    adminRouter = express.Router();
+    adminRouter.use((_req, res) => {
+      return res
+        .status(503)
+        .send("Admin panel is temporarily unavailable. Check server logs.");
     });
+  }
 }
 
 app.use(express.json());
