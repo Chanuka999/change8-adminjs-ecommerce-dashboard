@@ -58,6 +58,10 @@ app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
+app.get("/favicon.ico", (_req, res) => {
+  return res.redirect(302, "/public/icon.png");
+});
+
 app.get("/", (_req, res) => {
   return res.status(200).send(`<!doctype html>
 <html lang="en">
