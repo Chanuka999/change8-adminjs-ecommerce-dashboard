@@ -398,15 +398,22 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/uploads", uploadRoutes);
-sequelize
-  .sync({ alter: { drop: false } })
-  .then(() => {
-    app.listen(5000, () => {
-      console.log("Server running on http://localhost:5000");
-      console.log("AdminJS: http://localhost:5000/admin");
+
+const isVercelRuntime = process.env.VERCEL === "1";
+
+if (!isVercelRuntime) {
+  sequelize
+    .sync({ alter: { drop: false } })
+    .then(() => {
+      app.listen(5000, () => {
+        console.log("Server running on http://localhost:5000");
+        console.log("AdminJS: http://localhost:5000/admin");
+      });
+    })
+    .catch((error) => {
+      console.error("Database sync failed:", error);
+      process.exit(1);
     });
-  })
-  .catch((error) => {
-    console.error("Database sync failed:", error);
-    process.exit(1);
-  });
+}
+
+export default app;
