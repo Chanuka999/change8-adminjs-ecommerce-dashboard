@@ -28,30 +28,21 @@ const isServerlessRuntime =
 
 let adminRouter;
 
-if (isServerlessRuntime) {
+try {
+  const adminModule = await import("./admin/admin.js");
+  adminRouter = adminModule.default;
+} catch (error) {
+  console.error(
+    "AdminJS router initialization failed:",
+    error?.message || error,
+  );
+
   adminRouter = express.Router();
   adminRouter.use((_req, res) => {
     return res
       .status(503)
-      .send("Admin panel is disabled in serverless deployment.");
+      .send("Admin panel is temporarily unavailable. Check server logs.");
   });
-} else {
-  try {
-    const adminModule = await import("./admin/admin.js");
-    adminRouter = adminModule.default;
-  } catch (error) {
-    console.error(
-      "AdminJS router initialization failed:",
-      error?.message || error,
-    );
-
-    adminRouter = express.Router();
-    adminRouter.use((_req, res) => {
-      return res
-        .status(503)
-        .send("Admin panel is temporarily unavailable. Check server logs.");
-    });
-  }
 }
 
 app.use(express.json());
@@ -73,11 +64,13 @@ app.get("/", (_req, res) => {
       body { font-family: Arial, sans-serif; margin: 40px; color: #0f172a; }
       h1 { margin-bottom: 8px; }
       code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+      a { color: #1d4ed8; text-decoration: none; font-weight: 600; }
     </style>
   </head>
   <body>
     <h1>Change8 Backend Is Running</h1>
     <p>API is live. Try <code>/api/products</code> or <code>/api/login</code>.</p>
+    <p>Open the website/admin UI: <a href="/admin">/admin</a></p>
   </body>
 </html>`);
 });
