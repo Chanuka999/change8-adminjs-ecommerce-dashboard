@@ -1,6 +1,5 @@
 import express from "express";
 import sequelize from "./config/database.js";
-import adminRouter from "./admin/admin.js";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
@@ -20,6 +19,24 @@ dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+let adminRouter = express.Router();
+
+try {
+  const adminModule = await import("./admin/admin.js");
+  adminRouter = adminModule.default;
+} catch (error) {
+  console.error(
+    "AdminJS router initialization failed:",
+    error?.message || error,
+  );
+
+  adminRouter.get("*", (_req, res) => {
+    return res
+      .status(503)
+      .send("Admin panel is temporarily unavailable. Check server logs.");
+  });
+}
 
 app.use(express.json());
 app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
