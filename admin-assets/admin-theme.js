@@ -115,31 +115,10 @@
     root.setAttribute("data-admin-theme", theme);
   };
 
-  const getCookieValue = (name) => {
-    const encodedName = `${name}=`;
-    return (
-      document.cookie
-        .split(";")
-        .map((part) => part.trim())
-        .find((part) => part.startsWith(encodedName))
-        ?.slice(encodedName.length) || ""
-    );
-  };
-
   const syncUserRoleState = async () => {
     if (!window.location.pathname.startsWith("/admin") || isLoginPage()) {
       root.removeAttribute("data-admin-role");
       root.classList.remove("change8-user-role");
-      return;
-    }
-
-    const role = String(
-      getCookieValue("change8_admin_role") || "",
-    ).toLowerCase();
-
-    if (role === "user") {
-      root.setAttribute("data-admin-role", "user");
-      root.classList.add("change8-user-role");
       return;
     }
 

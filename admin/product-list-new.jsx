@@ -126,6 +126,22 @@ const buttonStyle = {
   transition: "background-color 0.2s",
 };
 
+const getOptimizedImageUrl = (url, width = 560, quality = "auto") => {
+  const source = String(url || "").trim();
+  if (!source) {
+    return "";
+  }
+
+  if (!source.includes("res.cloudinary.com") || !source.includes("/upload/")) {
+    return source;
+  }
+
+  return source.replace(
+    "/upload/",
+    `/upload/f_auto,q_${quality},w_${width},c_limit,dpr_auto/`,
+  );
+};
+
 const ProductListView = (props) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +151,7 @@ const ProductListView = (props) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/products", {
+        const response = await fetch("/api/products?lean=true&limit=60", {
           method: "GET",
           credentials: "include",
         });
@@ -212,7 +228,13 @@ const ProductListView = (props) => {
           >
             <div style={imageContainerStyle}>
               {imageUrl ? (
-                <img src={imageUrl} alt={name} style={imageStyle} />
+                <img
+                  src={getOptimizedImageUrl(imageUrl) || imageUrl}
+                  alt={name}
+                  style={imageStyle}
+                  loading="lazy"
+                  decoding="async"
+                />
               ) : (
                 <div style={{ color: "#cbd5e1", fontSize: "12px" }}>
                   No Image

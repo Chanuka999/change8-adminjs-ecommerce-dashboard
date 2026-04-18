@@ -18,11 +18,32 @@ const issueToken = (user) => {
   });
 };
 
-const applyAuthCookie = (res, token) => {
+const resolveAuthCookieSecure = (req) => {
+  const override = String(process.env.AUTH_COOKIE_SECURE || "")
+    .trim()
+    .toLowerCase();
+
+  if (override === "true") {
+    return true;
+  }
+
+  if (override === "false") {
+    return false;
+  }
+
+  const forwardedProto = String(req.headers["x-forwarded-proto"] || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+
+  return Boolean(req.secure || forwardedProto === "https");
+};
+
+const applyAuthCookie = (req, res, token) => {
   res.cookie("auth_token", token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: resolveAuthCookieSecure(req),
     maxAge: 12 * 60 * 60 * 1000,
     path: "/",
   });
@@ -33,7 +54,9 @@ export const login = async (req, res) => {
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
     const user = await User.findOne({ where: { email } });
@@ -49,7 +72,7 @@ export const login = async (req, res) => {
     }
 
     const token = issueToken(user);
-    applyAuthCookie(res, token);
+    applyAuthCookie(req, res, token);
 
     return res.json({
       token,
@@ -61,7 +84,9 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ message: "Login failed", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Login failed", error: error.message });
   }
 };
 
@@ -89,7 +114,7 @@ export const register = async (req, res) => {
     });
 
     const token = issueToken(user);
-    applyAuthCookie(res, token);
+    applyAuthCookie(req, res, token);
 
     return res.status(201).json({
       message: "User registered successfully",
