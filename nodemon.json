@@ -1,0 +1,23 @@
+{
+  "watch": [
+    "server.js",
+    "admin",
+    "controllers",
+    "routes",
+    "config",
+    "model",
+    "middleware"
+  ],
+  "ext": "js,mjs,cjs,json",
+  "ignore": [
+    ".adminjs/**",
+    "public/**",
+    "admin-assets/**",
+    "tmp-admin-assets.mjs",
+    "tmp-admin-import-test.mjs",
+    "_login_page.html",
+    "config/config.json",
+    "migrations/**",
+    "seeders/**"
+  ]
+}
