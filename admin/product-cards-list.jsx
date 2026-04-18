@@ -73,6 +73,22 @@ const emptyStyle = {
   color: "#cbd5e1",
 };
 
+const getOptimizedImageUrl = (url, width = 640, quality = "auto") => {
+  const source = String(url || "").trim();
+  if (!source) {
+    return "";
+  }
+
+  if (!source.includes("res.cloudinary.com") || !source.includes("/upload/")) {
+    return source;
+  }
+
+  return source.replace(
+    "/upload/",
+    `/upload/f_auto,q_${quality},w_${width},c_limit,dpr_auto/`,
+  );
+};
+
 const formatPrice = (value) => {
   const amount = Number(value || 0);
   if (!Number.isFinite(amount)) {
@@ -185,20 +201,22 @@ const ProductCardsList = (props) => {
         const name = params?.name || "Unnamed product";
         const category = params?.categoryId || "-";
         const imageUrl = params?.imageUrl || "";
+        const optimizedImageUrl = getOptimizedImageUrl(imageUrl, 560);
         const stock = Number(params?.stock || 0);
         const isActive = Boolean(params?.isActive);
         const detailsHref = getShowHref(record, resourceId);
-        const openDetails = () => {
-          if (detailsHref) {
-            window.location.assign(detailsHref);
-          }
-        };
 
         return (
           <article key={id} style={cardStyle}>
             <div style={imageWrapStyle}>
               {imageUrl ? (
-                <img src={imageUrl} alt={name} style={imageStyle} />
+                <img
+                  src={optimizedImageUrl || imageUrl}
+                  alt={name}
+                  style={imageStyle}
+                  loading="lazy"
+                  decoding="async"
+                />
               ) : (
                 <div
                   style={{
@@ -228,10 +246,6 @@ const ProductCardsList = (props) => {
               <a
                 href={detailsHref || "#"}
                 style={linkStyle}
-                onClick={(event) => {
-                  event.preventDefault();
-                  openDetails();
-                }}
                 aria-disabled={!detailsHref}
               >
                 View details

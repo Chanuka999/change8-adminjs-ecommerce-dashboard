@@ -37,8 +37,25 @@ const textStyle = {
   gap: "2px",
 };
 
+const getOptimizedImageUrl = (url, width = 320, quality = "auto") => {
+  const source = String(url || "").trim();
+  if (!source) {
+    return "";
+  }
+
+  if (!source.includes("res.cloudinary.com") || !source.includes("/upload/")) {
+    return source;
+  }
+
+  return source.replace(
+    "/upload/",
+    `/upload/f_auto,q_${quality},w_${width},c_limit,dpr_auto/`,
+  );
+};
+
 const ProductImage = (props) => {
   const imageUrl = props?.record?.params?.[props?.property?.path];
+  const optimizedImageUrl = getOptimizedImageUrl(imageUrl);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -75,9 +92,11 @@ const ProductImage = (props) => {
   return (
     <div style={cellStyle}>
       <img
-        src={imageUrl}
+        src={optimizedImageUrl || imageUrl}
         alt="Product"
         style={imageStyle}
+        loading="lazy"
+        decoding="async"
         onError={() => setHasError(true)}
       />
       <div style={textStyle}>
