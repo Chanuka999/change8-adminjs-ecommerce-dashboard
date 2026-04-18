@@ -509,48 +509,8 @@ const Dashboard = () => {
             box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
           }
 
-
           .change8-admin-card {
-            padding: 22px 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            position: relative;
-            overflow: hidden;
-            transition: box-shadow 0.2s, transform 0.2s;
-            box-shadow: 0 8px 24px rgba(99,102,241,0.08);
-          }
-
-          .change8-admin-card:hover {
-            box-shadow: 0 16px 32px rgba(99,102,241,0.16);
-            transform: translateY(-2px) scale(1.025);
-          }
-
-          .change8-admin-card .dashboard-card-icon {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            opacity: 0.85;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: #fff;
-            border-radius: 12px;
-            padding: 10px;
-            box-shadow: 0 2px 8px rgba(139,92,246,0.10);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .change8-admin-card.users .dashboard-card-icon {
-            background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
-          }
-          .change8-admin-card.products .dashboard-card-icon {
-            background: linear-gradient(135deg, #fbbf24 0%, #f472b6 100%);
-          }
-          .change8-admin-card.orders .dashboard-card-icon {
-            background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
-          }
-          .change8-admin-card.categories .dashboard-card-icon {
-            background: linear-gradient(135deg, #f472b6 0%, #a78bfa 100%);
+            padding: 18px;
           }
 
           .change8-admin-card-label {
@@ -745,47 +705,19 @@ const Dashboard = () => {
           </div>
 
           <div className="change8-admin-dashboard-cards">
-            <div className="change8-admin-card users">
-              <span
-                className="dashboard-card-icon"
-                role="img"
-                aria-label="Users"
-              >
-                👥
-              </span>
+            <div className="change8-admin-card">
               <div className="change8-admin-card-label">Users</div>
               <div className="change8-admin-card-value">{summary.users}</div>
             </div>
-            <div className="change8-admin-card products">
-              <span
-                className="dashboard-card-icon"
-                role="img"
-                aria-label="Products"
-              >
-                🛒
-              </span>
+            <div className="change8-admin-card">
               <div className="change8-admin-card-label">Products</div>
               <div className="change8-admin-card-value">{summary.products}</div>
             </div>
-            <div className="change8-admin-card orders">
-              <span
-                className="dashboard-card-icon"
-                role="img"
-                aria-label="Orders"
-              >
-                📦
-              </span>
+            <div className="change8-admin-card">
               <div className="change8-admin-card-label">Orders</div>
               <div className="change8-admin-card-value">{summary.orders}</div>
             </div>
-            <div className="change8-admin-card categories">
-              <span
-                className="dashboard-card-icon"
-                role="img"
-                aria-label="Categories"
-              >
-                🏷️
-              </span>
+            <div className="change8-admin-card">
               <div className="change8-admin-card-label">Categories</div>
               <div className="change8-admin-card-value">
                 {summary.categories}
@@ -910,7 +842,7 @@ const Dashboard = () => {
     <div className="change8-storefront-dashboard">
       <style>{`
         .change8-storefront-dashboard {
-          --bg: #ffffff;
+          --bg: #f7f7f7;
           --text: #111111;
           --muted: #666666;
           --line: rgba(17, 17, 17, 0.08);
@@ -1500,242 +1432,9 @@ const Dashboard = () => {
           color: var(--muted);
         }
 
-        .change8-styleflow-zone {
-          margin: 10px 14px 24px;
-          border-radius: 22px;
-          overflow: hidden;
-          border: 1px solid rgba(15, 23, 42, 0.08);
-          background: #ffffff;
-          box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
-        }
-
-        .change8-styleflow-hero {
-          min-height: 165px;
-          padding: 28px 24px;
-          display: grid;
-          place-items: center;
-          text-align: center;
-          color: #f8fafc;
-          background:
-            linear-gradient(rgba(16, 33, 61, 0.64), rgba(16, 33, 61, 0.64)),
-            url("/public/img4.png") center / cover no-repeat;
-        }
-
-        .change8-styleflow-hero h2 {
-          margin: 0;
-          font-size: clamp(30px, 4vw, 56px);
-          line-height: 1.06;
-          letter-spacing: -0.03em;
-        }
-
-        .change8-styleflow-content {
-          padding: 18px;
-          display: grid;
-          grid-template-columns: 2fr 1fr;
-          gap: 14px;
-        }
-
-        .change8-styleflow-card {
-          background: #ffffff;
-          border: 1px solid rgba(15, 23, 42, 0.08);
-          border-radius: 14px;
-          box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-          padding: 16px;
-        }
-
-        .change8-styleflow-card h3 {
-          margin: 0;
-          font-size: 20px;
-          font-weight: 800;
-        }
-
-        .change8-recent-row {
-          margin-top: 12px;
-          display: grid;
-          grid-template-columns: auto repeat(4, minmax(0, 1fr)) auto;
-          gap: 10px;
-          align-items: center;
-        }
-
-        .change8-mini-arrow {
-          width: 34px;
-          height: 34px;
-          border-radius: 999px;
-          border: 1px solid rgba(15, 23, 42, 0.16);
-          display: grid;
-          place-items: center;
-          color: #334155;
-          font-size: 22px;
-        }
-
-        .change8-recent-item {
-          height: 76px;
-          border-radius: 10px;
-          overflow: hidden;
-          border: 1px solid rgba(15, 23, 42, 0.1);
-          background: #f2f5fb;
-        }
-
-        .change8-recent-item img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .change8-flow-list {
-          margin-top: 12px;
-          display: grid;
-          gap: 10px;
-        }
-
-        .change8-flow-row {
-          display: grid;
-          gap: 6px;
-        }
-
-        .change8-flow-row strong {
-          font-size: 17px;
-        }
-
-        .change8-flow-track {
-          height: 8px;
-          border-radius: 999px;
-          overflow: hidden;
-          background: #d7deea;
-        }
-
-        .change8-flow-fill {
-          height: 100%;
-          border-radius: inherit;
-          background: linear-gradient(90deg, #123676, #41a1b0);
-        }
-
-        .change8-quick-links {
-          margin: 10px 0 0;
-          padding: 0;
-          list-style: none;
-          display: grid;
-          gap: 8px;
-        }
-
-        .change8-quick-links li {
-          font-size: 20px;
-          font-weight: 600;
-        }
-
-        .change8-fav-list {
-          margin: 12px 0 0;
-          padding: 0;
-          list-style: none;
-          display: grid;
-          gap: 10px;
-        }
-
-        .change8-fav-list li {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-        }
-
-        .change8-fav-meta {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 0;
-        }
-
-        .change8-fav-avatar {
-          width: 26px;
-          height: 26px;
-          border-radius: 999px;
-          overflow: hidden;
-          border: 1px solid rgba(15, 23, 42, 0.16);
-        }
-
-        .change8-fav-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        .change8-fav-heart {
-          font-size: 17px;
-          color: #1d4c82;
-        }
-
-        .change8-reward-points {
-          margin-top: 6px;
-          font-size: 42px;
-          line-height: 1;
-          font-weight: 800;
-        }
-
-        .change8-reward-row {
-          margin-top: 10px;
-          display: grid;
-          gap: 4px;
-        }
-
-        .change8-reward-row span {
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
-          font-size: 14px;
-          font-weight: 700;
-        }
-
-        .change8-styleflow-footer {
-          border-top: 1px solid rgba(15, 23, 42, 0.08);
-          background: rgba(255, 255, 255, 0.7);
-          padding: 18px 18px 12px;
-        }
-
-        .change8-styleflow-footer-grid {
-          display: grid;
-          grid-template-columns: 1.2fr 1fr 1fr 1fr;
-          gap: 14px;
-        }
-
-        .change8-styleflow-footer h4 {
-          margin: 0;
-          font-size: 19px;
-        }
-
-        .change8-styleflow-footer p,
-        .change8-styleflow-footer li {
-          margin: 6px 0 0;
-          color: #334155;
-          font-size: 14px;
-        }
-
-        .change8-styleflow-footer ul {
-          margin: 6px 0 0;
-          padding: 0;
-          list-style: none;
-        }
-
-        .change8-styleflow-copy {
-          margin-top: 12px;
-          padding-top: 10px;
-          border-top: 1px solid rgba(15, 23, 42, 0.08);
-          font-size: 12px;
-          color: #475569;
-        }
-
         @media (max-width: 1200px) {
           .change8-product-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-
-          .change8-styleflow-content {
-            grid-template-columns: 1fr;
-          }
-
-          .change8-styleflow-footer-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
         }
 
@@ -1809,18 +1508,6 @@ const Dashboard = () => {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             padding: 0 12px 12px;
-          }
-
-          .change8-recent-row {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .change8-mini-arrow {
-            display: none;
-          }
-
-          .change8-quick-links li {
-            font-size: 18px;
           }
 
           .change8-slider-arrow {
@@ -1920,23 +1607,6 @@ const Dashboard = () => {
 
           .change8-products-title {
             font-size: 22px;
-          }
-
-          .change8-styleflow-zone {
-            margin: 6px 12px 16px;
-          }
-
-          .change8-styleflow-content,
-          .change8-styleflow-footer {
-            padding: 12px;
-          }
-
-          .change8-styleflow-footer-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .change8-recent-row {
-            grid-template-columns: 1fr;
           }
 
           .change8-products-head {
@@ -2225,205 +1895,6 @@ const Dashboard = () => {
                 })}
               </div>
             )}
-          </section>
-
-          <section
-            className="change8-styleflow-zone"
-            aria-label="Personalized style dashboard"
-          >
-            <div className="change8-styleflow-hero">
-              <h2>Your Style Journey Starts Here. Manage Your Flows.</h2>
-            </div>
-
-            <div className="change8-styleflow-content">
-              <div>
-                <article className="change8-styleflow-card">
-                  <h3>Recently Viewed</h3>
-                  <div className="change8-recent-row">
-                    <div className="change8-mini-arrow">&#8249;</div>
-                    <div className="change8-recent-item">
-                      <img
-                        src="/public/img3.png"
-                        alt="Recently viewed item one"
-                      />
-                    </div>
-                    <div className="change8-recent-item">
-                      <img
-                        src="/public/img4.png"
-                        alt="Recently viewed item two"
-                      />
-                    </div>
-                    <div className="change8-recent-item">
-                      <img
-                        src="/public/img5.png"
-                        alt="Recently viewed item three"
-                      />
-                    </div>
-                    <div className="change8-recent-item">
-                      <img
-                        src="/public/img6.png"
-                        alt="Recently viewed item four"
-                      />
-                    </div>
-                    <div className="change8-mini-arrow">&#8250;</div>
-                  </div>
-                </article>
-
-                <article
-                  className="change8-styleflow-card"
-                  style={{ marginTop: "12px" }}
-                >
-                  <h3>Flows in Progress</h3>
-                  <div className="change8-flow-list">
-                    <div className="change8-flow-row">
-                      <strong>Spring Edit (80%)</strong>
-                      <div className="change8-flow-track">
-                        <div
-                          className="change8-flow-fill"
-                          style={{ width: "80%" }}
-                        />
-                      </div>
-                    </div>
-                    <div className="change8-flow-row">
-                      <strong>Activewear V2 (35%)</strong>
-                      <div className="change8-flow-track">
-                        <div
-                          className="change8-flow-fill"
-                          style={{ width: "35%" }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </article>
-
-                <article
-                  className="change8-styleflow-card"
-                  style={{ marginTop: "12px" }}
-                >
-                  <h3>Quick Links</h3>
-                  <ul className="change8-quick-links">
-                    <li>Order History</li>
-                    <li>Account Settings</li>
-                    <li>Loyalty Points</li>
-                  </ul>
-                </article>
-              </div>
-
-              <div>
-                <article className="change8-styleflow-card">
-                  <h3>My Favorites</h3>
-                  <ul className="change8-fav-list">
-                    <li>
-                      <span className="change8-fav-meta">
-                        <span className="change8-fav-avatar">
-                          <img src="/public/img7.png" alt="Coastal Blazer" />
-                        </span>
-                        <span>Coastal Blazer</span>
-                      </span>
-                      <span className="change8-fav-heart">&#9829;</span>
-                    </li>
-                    <li>
-                      <span className="change8-fav-meta">
-                        <span className="change8-fav-avatar">
-                          <img src="/public/img8.png" alt="Recomive Pant" />
-                        </span>
-                        <span>Recomive Pant</span>
-                      </span>
-                      <span className="change8-fav-heart">&#9829;</span>
-                    </li>
-                    <li>
-                      <span className="change8-fav-meta">
-                        <span className="change8-fav-avatar">
-                          <img src="/public/img6.png" alt="Activewear V2" />
-                        </span>
-                        <span>Activewear V2</span>
-                      </span>
-                      <span className="change8-fav-heart">&#9829;</span>
-                    </li>
-                    <li>
-                      <span className="change8-fav-meta">
-                        <span className="change8-fav-avatar">
-                          <img src="/public/img5.png" alt="Hevartitos" />
-                        </span>
-                        <span>Hevartitos</span>
-                      </span>
-                      <span className="change8-fav-heart">&#9829;</span>
-                    </li>
-                  </ul>
-                </article>
-
-                <article
-                  className="change8-styleflow-card"
-                  style={{ marginTop: "12px" }}
-                >
-                  <h3>StyleFlow Rewards</h3>
-                  <div className="change8-reward-points">240 pts</div>
-                  <div className="change8-reward-row">
-                    <span>
-                      <em>Style Flow Master</em>
-                      <em>240 pts</em>
-                    </span>
-                    <div className="change8-flow-track">
-                      <div
-                        className="change8-flow-fill"
-                        style={{ width: "100%" }}
-                      />
-                    </div>
-                  </div>
-                  <div className="change8-reward-row">
-                    <span>
-                      <em>Style Flow Tier</em>
-                      <em>60 pts</em>
-                    </span>
-                    <div className="change8-flow-track">
-                      <div
-                        className="change8-flow-fill"
-                        style={{ width: "40%" }}
-                      />
-                    </div>
-                  </div>
-                </article>
-              </div>
-            </div>
-
-            <footer className="change8-styleflow-footer">
-              <div className="change8-styleflow-footer-grid">
-                <div>
-                  <h4>StyleFlow</h4>
-                  <p>
-                    StyleFlow curates modern fashion with guided discovery and
-                    smooth checkout journeys.
-                  </p>
-                </div>
-                <div>
-                  <h4>Products</h4>
-                  <ul>
-                    <li>Product</li>
-                    <li>About Us</li>
-                    <li>Contact</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4>Links</h4>
-                  <ul>
-                    <li>Stories</li>
-                    <li>Blog</li>
-                    <li>Support</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4>Social Media</h4>
-                  <ul>
-                    <li>Facebook</li>
-                    <li>Instagram</li>
-                    <li>Twitter</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="change8-styleflow-copy">
-                Copyright &#169; StyleFlow.com
-              </div>
-            </footer>
           </section>
         </main>
       </div>
