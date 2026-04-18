@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const About = () => {
   return (
@@ -8,13 +9,13 @@ const About = () => {
       </div>
       <div className="change8-about-shell-inner">
         <div className="change8-about-back-wrap">
-          <a
+          <Link
             className="change8-about-back-btn"
-            href="/"
+            to="/admin"
             aria-label="Back to user dashboard"
           >
             {"<- Back to User Dashboard"}
-          </a>
+          </Link>
         </div>
 
         <section className="change8-about-section">

@@ -299,6 +299,7 @@ const productResource = {
       "sku",
       "categoryId",
       "isActive",
+      "images",
       "uploadImage",
       "imagePublicId",
       "sizeStockText",
@@ -311,17 +312,28 @@ const productResource = {
         reference: "Categories",
         isRequired: true,
       },
+      images: {
+        type: "mixed",
+        isArray: true,
+        isVisible: {
+          list: false,
+          filter: false,
+          show: true,
+          edit: true,
+        },
+        label: "Product Images (up to 3)",
+        components: {
+          edit: Components.ProductImageUpload,
+          show: Components.ProductImage,
+        },
+      },
       uploadImage: {
         type: "string",
         isVisible: {
           list: false,
           filter: false,
           show: false,
-          edit: true,
-        },
-        label: "Upload Image",
-        components: {
-          edit: Components.ProductImageUpload,
+          edit: false,
         },
       },
       imageUrl: {

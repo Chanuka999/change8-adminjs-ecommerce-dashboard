@@ -138,6 +138,11 @@ const Product = sequelize.define(
       allowNull: false,
       defaultValue: {},
     },
+    images: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+    },
     imageUrl: {
       type: DataTypes.STRING,
       allowNull: true,

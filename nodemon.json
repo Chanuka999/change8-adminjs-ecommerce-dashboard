@@ -8,7 +8,7 @@
     "model",
     "middleware"
   ],
-  "ext": "js,mjs,cjs,json",
+  "ext": "js,mjs,cjs,json,jsx",
   "ignore": [
     ".adminjs/**",
     "public/**",

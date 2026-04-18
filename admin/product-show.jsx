@@ -246,6 +246,9 @@ const formatDate = (value) => {
 };
 
 const getProductImage = (params) => {
+  if (Array.isArray(params?.images) && params.images.length > 0) {
+    return params.images;
+  }
   return (
     params?.imageUrl ||
     params?.image ||
@@ -591,7 +594,24 @@ const ProductShow = (props) => {
         <div className="change8-product-show-layout" style={layoutStyle}>
           <section style={imageCardStyle}>
             <div style={imageWrapStyle}>
-              {imageUrl ? (
+              {Array.isArray(productData.images) &&
+              productData.images.length > 0 ? (
+                <div style={{ display: "flex", gap: 12 }}>
+                  {productData.images.map((img, idx) => (
+                    <img
+                      key={img}
+                      src={img}
+                      alt={name + " " + (idx + 1)}
+                      style={{
+                        ...imageStyle,
+                        width: 120,
+                        height: 120,
+                        objectFit: "cover",
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : imageUrl && typeof imageUrl === "string" ? (
                 <img src={imageUrl} alt={name} style={imageStyle} />
               ) : (
                 <div style={imageFallbackStyle}>No image available</div>

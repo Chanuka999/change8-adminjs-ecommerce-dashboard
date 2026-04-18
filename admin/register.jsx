@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const [formState, setFormState] = useState({
@@ -261,7 +262,10 @@ const Register = () => {
         </form>
 
         <div className="register-footer">
-          Already have an account? <a href="/admin">Log in</a>
+          Already have an account? <Link to="/admin">Log in</Link>
+          <br />
+          <Link to="/admin/pages/About">About</Link> |{" "}
+          <Link to="/admin/pages/Contact">Contact</Link>
         </div>
       </div>
     </div>

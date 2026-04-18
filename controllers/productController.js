@@ -27,6 +27,23 @@ export const createProduct = async (req, res) => {
   try {
     const payload = { ...req.body };
 
+    // If images field is present (from AdminJS custom upload), use it
+    if (payload.images) {
+      let imagesArr = payload.images;
+      if (typeof imagesArr === "string") {
+        try {
+          imagesArr = JSON.parse(imagesArr);
+        } catch {
+          imagesArr = [];
+        }
+      }
+      if (Array.isArray(imagesArr) && imagesArr.length > 0) {
+        payload.imageUrl = imagesArr[0];
+        payload.images = imagesArr;
+      }
+    }
+
+    // Fallback: if file upload is present, use backend upload
     if (req.file?.buffer) {
       const uploadedImage = await uploadImageToCloudinary(req.file.buffer);
       payload.imageUrl = uploadedImage.secure_url;

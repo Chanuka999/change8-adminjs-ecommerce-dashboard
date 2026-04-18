@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -366,7 +367,14 @@ const Contact = () => {
         {/* Header */}
         <div className="contact-section">
           <div className="contact-header">
-            <h1>Contact Change8</h1>
+            <Link
+              className="change8-about-back-btn"
+              to="/admin"
+              aria-label="Back to user dashboard"
+            >
+              {"<- Back to User Dashboard"}
+            </Link>
+            <h1>Style Flow</h1>
             <p>We're here to help you flow.</p>
           </div>
         </div>
@@ -379,7 +387,14 @@ const Contact = () => {
                 <div className="contact-icon">📞</div>
                 <div className="contact-item-content">
                   <h3>Phone</h3>
-                  <p>+1 (800) 123-FLOW</p>
+                  <p>
+                    <a
+                      href="tel:+94772849767"
+                      style={{ color: "#0369a1", textDecoration: "none" }}
+                    >
+                      +94 772849767
+                    </a>
+                  </p>
                   <p>Monday - Friday, 9am - 5pm EST</p>
                 </div>
               </div>
@@ -388,7 +403,14 @@ const Contact = () => {
                 <div className="contact-icon">✉️</div>
                 <div className="contact-item-content">
                   <h3>Email</h3>
-                  <p>support@change8.com</p>
+                  <p>
+                    <a
+                      href="mailto:support@change8.com"
+                      style={{ color: "#0369a1", textDecoration: "none" }}
+                    >
+                      chanukaranditha99@gmail.com
+                    </a>
+                  </p>
                 </div>
               </div>
 
@@ -396,23 +418,51 @@ const Contact = () => {
                 <div className="contact-icon">📍</div>
                 <div className="contact-item-content">
                   <h3>Headquarters Address</h3>
-                  <p>123 Fashion Ave, Suite 400</p>
-                  <p>New York, NY 10011</p>
+                  <p>
+                    <a
+                      href="https://maps.google.com/?q=123+Fashion+Ave,+Suite+400,+New+York,+NY+10011"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#0369a1", textDecoration: "none" }}
+                    >
+                      6 mail post
+                      <br />
+                      Laxapana
+                    </a>
+                  </p>
                 </div>
               </div>
 
               <div className="contact-item">
-                <div className="contact-icon">𝕏</div>
+                <div className="contact-icon">🌐</div>
                 <div className="contact-item-content">
                   <h3>Social Media</h3>
                   <div className="contact-links">
-                    <a href="#" className="contact-link" title="Twitter">
+                    <a
+                      href="https://twitter.com/change8"
+                      className="contact-link"
+                      title="Twitter"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       𝕏
                     </a>
-                    <a href="#" className="contact-link" title="Instagram">
+                    <a
+                      href="https://instagram.com/change8"
+                      className="contact-link"
+                      title="Instagram"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       📷
                     </a>
-                    <a href="#" className="contact-link" title="LinkedIn">
+                    <a
+                      href="https://linkedin.com/company/change8"
+                      className="contact-link"
+                      title="LinkedIn"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       💼
                     </a>
                   </div>
@@ -420,7 +470,18 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="contact-map">Map Placeholder</div>
+            <div className="contact-map">
+              <iframe
+                title="Change8 HQ Map"
+                src="https://www.google.com/maps?q=123+Fashion+Ave,+New+York,+NY+10011&output=embed"
+                width="100%"
+                height="220"
+                style={{ border: 0, borderRadius: "12px" }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </div>
         </div>
 
@@ -432,7 +493,7 @@ const Contact = () => {
               <p>Drop Us a Line</p>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} autoComplete="off" noValidate>
               <div className="form-group">
                 <label htmlFor="fullName">Full Name</label>
                 <input
@@ -444,7 +505,15 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   disabled={submitting}
+                  autoFocus
                 />
+                {submitStatus &&
+                  submitStatus.type === "error" &&
+                  !formData.fullName && (
+                    <span style={{ color: "#991b1b", fontSize: 13 }}>
+                      Full name is required.
+                    </span>
+                  )}
               </div>
 
               <div className="form-group">
@@ -459,6 +528,14 @@ const Contact = () => {
                   required
                   disabled={submitting}
                 />
+                {submitStatus &&
+                  submitStatus.type === "error" &&
+                  (!formData.email ||
+                    !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) && (
+                    <span style={{ color: "#991b1b", fontSize: 13 }}>
+                      Valid email is required.
+                    </span>
+                  )}
               </div>
 
               <div className="form-group">
@@ -473,6 +550,13 @@ const Contact = () => {
                   required
                   disabled={submitting}
                 />
+                {submitStatus &&
+                  submitStatus.type === "error" &&
+                  !formData.subject && (
+                    <span style={{ color: "#991b1b", fontSize: 13 }}>
+                      Subject is required.
+                    </span>
+                  )}
               </div>
 
               <div className="form-group">
@@ -486,6 +570,13 @@ const Contact = () => {
                   required
                   disabled={submitting}
                 />
+                {submitStatus &&
+                  submitStatus.type === "error" &&
+                  !formData.message && (
+                    <span style={{ color: "#991b1b", fontSize: 13 }}>
+                      Message is required.
+                    </span>
+                  )}
               </div>
 
               <button
@@ -497,7 +588,10 @@ const Contact = () => {
               </button>
 
               {submitStatus && (
-                <div className={`form-status ${submitStatus.type}`}>
+                <div
+                  className={`form-status ${submitStatus.type}`}
+                  style={{ fontSize: 16, fontWeight: 700 }}
+                >
                   {submitStatus.message}
                 </div>
               )}

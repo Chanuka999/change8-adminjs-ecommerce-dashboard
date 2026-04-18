@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 const formatCurrency = (value) => {
   const amount = Number(value || 0);
@@ -295,15 +296,16 @@ const Dashboard = () => {
   const heroSlides = useMemo(() => {
     return [
       {
-        id: "img3-static",
+        id: "img9-static",
         name: "New Collection",
         categoryName: "Featured",
-        imageUrl: "/public/img3.png",
+        imageUrl: "/public/img9.png",
         isActive: true,
         stock: 0,
         price: 0,
         recordActions: [],
       },
+
       {
         id: "img4-static",
         name: "Latest Drop",
@@ -315,10 +317,10 @@ const Dashboard = () => {
         recordActions: [],
       },
       {
-        id: "img5-static",
-        name: "Latest Drop",
+        id: "img10-static",
+        name: "New Collection",
         categoryName: "Featured",
-        imageUrl: "/public/img5.png",
+        imageUrl: "/public/img10.png",
         isActive: true,
         stock: 0,
         price: 0,
@@ -1664,8 +1666,8 @@ const Dashboard = () => {
               Home
             </a>
             <a href="#products">Product</a>
-            <a href="/admin/pages/About">About</a>
-            <a href="/admin/pages/Contact">Contact Us</a>
+            <Link to="/admin/pages/About">About</Link>
+            <Link to="/admin/pages/Contact">Contact Us</Link>
           </div>
 
           <div className="change8-brand" aria-label="Store brand">
@@ -1852,9 +1854,9 @@ const Dashboard = () => {
 
                   return (
                     <article key={product.id}>
-                      <a
+                      <Link
                         className="change8-product-card"
-                        href={href || "#"}
+                        to={href || "#"}
                         onClick={(event) => {
                           if (!href) {
                             event.preventDefault();
@@ -1889,7 +1891,7 @@ const Dashboard = () => {
                           <s>{formatCurrency(product.price * 1.14)}</s>
                           {formatCurrency(product.price)}
                         </div>
-                      </a>
+                      </Link>
                     </article>
                   );
                 })}
