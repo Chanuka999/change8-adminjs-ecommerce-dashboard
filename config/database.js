@@ -4,9 +4,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = String(process.env.DATABASE_URL || "").trim();
+const dbUseUrlOverride = String(process.env.DB_USE_DATABASE_URL || "")
+  .trim()
+  .toLowerCase();
+
+const shouldUseDatabaseUrl =
+  dbUseUrlOverride === "true"
+    ? true
+    : dbUseUrlOverride === "false"
+      ? false
+      : Boolean(databaseUrl);
+
 const useSsl =
-  Boolean(databaseUrl) ||
+  shouldUseDatabaseUrl ||
   String(process.env.DB_SSL || "")
     .trim()
     .toLowerCase() === "true";
@@ -25,7 +36,7 @@ const baseOptions = {
     : {},
 };
 
-const sequelize = databaseUrl
+const sequelize = shouldUseDatabaseUrl
   ? new Sequelize(databaseUrl, baseOptions)
   : new Sequelize(
       process.env.DB_NAME,

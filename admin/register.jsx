@@ -46,7 +46,7 @@ const Register = () => {
       });
 
       setTimeout(() => {
-        window.location.href = "/admin/login";
+        window.location.href = "/admin";
       }, 2000);
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -261,7 +261,7 @@ const Register = () => {
         </form>
 
         <div className="register-footer">
-          Already have an account? <a href="/admin/login">Log in</a>
+          Already have an account? <a href="/admin">Log in</a>
         </div>
       </div>
     </div>

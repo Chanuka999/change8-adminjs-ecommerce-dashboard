@@ -1,3 +1,9 @@
+const layoutStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(320px, 1.05fr) minmax(360px, 0.95fr)",
+  gap: "32px",
+  alignItems: "start",
+};
 import React, { useEffect, useState } from "react";
 
 const pageStyle = {
@@ -19,14 +25,6 @@ const topBarStyle = {
 const backLinkStyle = {
   color: "#111827",
   textDecoration: "none",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "8px",
-  fontSize: "14px",
-  fontWeight: 700,
-};
-
-const layoutStyle = {
   display: "grid",
   gridTemplateColumns: "minmax(320px, 1.05fr) minmax(360px, 0.95fr)",
   gap: "18px",
@@ -223,22 +221,6 @@ const primaryButtonStyle = {
   boxShadow: "0 10px 18px rgba(99, 102, 241, 0.3)",
 };
 
-const secondaryButtonStyle = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "8px",
-  minWidth: "180px",
-  padding: "14px 18px",
-  borderRadius: "14px",
-  border: "1px solid rgba(17, 24, 39, 0.12)",
-  background: "#ffffff",
-  color: "#111827",
-  fontSize: "15px",
-  fontWeight: 700,
-  cursor: "pointer",
-};
-
 const formatCurrency = (value) => {
   const amount = Number(value || 0);
   return `Rs. ${amount.toLocaleString(undefined, {
@@ -316,6 +298,7 @@ const ProductShow = (props) => {
   const params = record?.params || {};
   const [currentUserRole, setCurrentUserRole] = useState(null);
   const [productData, setProductData] = useState(params);
+  const [loading, setLoading] = useState(true);
 
   const productId = params?.id || record?.id || "";
   const name = productData?.name || "Unnamed product";
@@ -330,10 +313,6 @@ const ProductShow = (props) => {
   const description =
     productData?.description || "No description available for this product.";
 
-  const editUrl = productId
-    ? `/admin/resources/Products/records/${encodeURIComponent(String(productId))}/edit`
-    : "";
-
   const orderUrl = productId
     ? `/admin/resources/Orders/actions/new?productId=${encodeURIComponent(String(productId))}`
     : "";
@@ -344,15 +323,11 @@ const ProductShow = (props) => {
     }
   };
 
-  const handleEditClick = () => {
-    if (editUrl) {
-      window.location.assign(editUrl);
-    }
-  };
-
   useEffect(() => {
-    // Fetch fresh product data with sizeStock
-    if (productId) {
+    setLoading(true);
+    // Only fetch if params incomplete (speed up page navigation)
+    const needsFetch = !params?.sizeStock || !params?.name;
+    if (productId && needsFetch) {
       fetch(`/api/products/${productId}`, {
         method: "GET",
         credentials: "include",
@@ -363,7 +338,11 @@ const ProductShow = (props) => {
           if (data?.id) {
             setProductData(data);
           }
+          setLoading(false);
         });
+    } else {
+      setProductData(params);
+      setLoading(false);
     }
 
     // Fetch current user role
@@ -390,6 +369,41 @@ const ProductShow = (props) => {
       body?.classList.remove("change8-product-show-active");
     };
   }, [productId]);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          ...pageStyle,
+          minHeight: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <style>{`
+          html.change8-product-show-active [data-testid="sidebar"],
+          html.change8-product-show-active .adminjs_Sidebar,
+          html.change8-product-show-active section[data-css="sidebar"],
+          html.change8-product-show-active aside[data-css="sidebar"],
+          html.change8-product-show-active nav[data-css="sidebar"] {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+            overflow: hidden !important;
+            box-shadow: none !important;
+          }
+        `}</style>
+        <div style={{ fontSize: "1.2rem", color: "#64748b" }}>
+          Loading product details...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={pageStyle}>
@@ -643,14 +657,6 @@ const ProductShow = (props) => {
                     Create Order
                   </button>
                 )}
-
-                <button
-                  type="button"
-                  style={secondaryButtonStyle}
-                  onClick={handleEditClick}
-                >
-                  Edit Product
-                </button>
               </div>
 
               <div
