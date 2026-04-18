@@ -42,8 +42,32 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
+    const rawLimit = Number(req.query?.limit);
+    const rawOffset = Number(req.query?.offset);
+    const isLean = String(req.query?.lean || "").toLowerCase() === "true";
+
+    const limit =
+      Number.isFinite(rawLimit) && rawLimit > 0
+        ? Math.min(Math.trunc(rawLimit), 100)
+        : undefined;
+    const offset =
+      Number.isFinite(rawOffset) && rawOffset >= 0
+        ? Math.trunc(rawOffset)
+        : undefined;
+
     const products = await Product.findAll({
-      include: [{ model: Category, as: "category" }],
+      attributes: isLean
+        ? ["id", "name", "price", "imageUrl", "isActive", "stock", "categoryId"]
+        : undefined,
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: isLean ? ["id", "name"] : undefined,
+        },
+      ],
+      ...(limit !== undefined ? { limit } : {}),
+      ...(offset !== undefined ? { offset } : {}),
       order: [["id", "DESC"]],
     });
 
