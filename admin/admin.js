@@ -252,6 +252,7 @@ const Components = {
     path.join(__dirname, "category-show.jsx"),
   ),
   About: componentLoader.add("About", path.join(__dirname, "about.jsx")),
+  Contact: componentLoader.add("Contact", path.join(__dirname, "contact.jsx")),
 };
 
 const productResource = {
@@ -389,7 +390,7 @@ const admin = new AdminJS({
     },
   },
   assets: {
-    styles: ["/custom/admin-theme.css?v=11.14"],
+    styles: ["/custom/admin-theme.css?v=11.15"],
     scripts: ["/custom/admin-theme.js?v=13.5"],
   },
   dashboard: {
@@ -449,6 +450,10 @@ const admin = new AdminJS({
     About: {
       label: "About",
       component: Components.About,
+    },
+    Contact: {
+      label: "Contact",
+      component: Components.Contact,
     },
   },
   resources: [
@@ -556,27 +561,52 @@ const adminCookieSecret =
   process.env.JWT_SECRET ||
   "change8-admin-cookie-secret";
 
+const adminSessionCookieSecureEnv = String(
+  process.env.ADMIN_SESSION_COOKIE_SECURE || "",
+)
+  .trim()
+  .toLowerCase();
+
+const adminSessionCookieSecure =
+  adminSessionCookieSecureEnv === "true"
+    ? true
+    : adminSessionCookieSecureEnv === "false"
+      ? false
+      : "auto";
+
 const router = AdminJSExpress.buildAuthenticatedRouter(
   admin,
   {
     authenticate: async (email, password) => {
-      const normalizedEmail = String(email || "")
+      const normalizedIdentifier = String(email || "")
         .trim()
         .toLowerCase();
       const rawPassword = String(password || "");
 
-      if (!normalizedEmail || !rawPassword) {
+      if (!normalizedIdentifier || !rawPassword) {
         return null;
       }
 
       const user = await User.findOne({
-        where: sequelize.where(
-          sequelize.fn("LOWER", sequelize.col("email")),
-          normalizedEmail,
-        ),
+        where: {
+          [Op.or]: [
+            sequelize.where(
+              sequelize.fn("LOWER", sequelize.col("email")),
+              normalizedIdentifier,
+            ),
+            sequelize.where(
+              sequelize.fn("LOWER", sequelize.col("name")),
+              normalizedIdentifier,
+            ),
+          ],
+        },
       });
 
-      if (!user || !(user.role === "admin" || user.role === "user")) {
+      const normalizedRole = String(user?.role || "")
+        .trim()
+        .toLowerCase();
+
+      if (!user || !(normalizedRole === "admin" || normalizedRole === "user")) {
         return null;
       }
 
@@ -590,7 +620,10 @@ const router = AdminJSExpress.buildAuthenticatedRouter(
         return null;
       }
 
-      return user;
+      const sessionUser = user.get({ plain: true });
+      delete sessionUser.password;
+
+      return sessionUser;
     },
     cookieName: "adminjs",
     cookiePassword: adminCookieSecret,
@@ -604,10 +637,7 @@ const router = AdminJSExpress.buildAuthenticatedRouter(
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure:
-        String(process.env.NODE_ENV || "")
-          .trim()
-          .toLowerCase() === "production",
+      secure: adminSessionCookieSecure,
       maxAge: 12 * 60 * 60 * 1000,
     },
   },
