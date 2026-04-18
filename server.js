@@ -1,4 +1,5 @@
 import express from "express";
+import compression from "compression";
 import sequelize from "./config/database.js";
 import dotenv from "dotenv";
 import path from "path";
@@ -26,6 +27,10 @@ const isServerlessRuntime =
   String(process.env.NOW_REGION || "").trim().length > 0 ||
   String(process.env.AWS_REGION || "").trim().length > 0;
 
+if (isServerlessRuntime) {
+  app.set("trust proxy", 1);
+}
+
 let adminRouter;
 let adminInitErrorMessage = "";
 
@@ -34,10 +39,7 @@ try {
   adminRouter = adminModule.default;
 } catch (error) {
   adminInitErrorMessage = String(error?.message || error || "Unknown error");
-  console.error(
-    "AdminJS router initialization failed:",
-    adminInitErrorMessage,
-  );
+  console.error("AdminJS router initialization failed:", adminInitErrorMessage);
 
   adminRouter = express.Router();
   adminRouter.use((_req, res) => {
@@ -61,16 +63,51 @@ try {
   });
 }
 
-app.use(express.json());
-app.use("/custom", express.static(path.join(__dirname, "admin-assets")));
-app.use("/public", express.static(path.join(__dirname, "public")));
+const jsonParser = express.json();
+const urlencodedParser = express.urlencoded({ extended: true });
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/admin")) {
+    return next();
+  }
+
+  return jsonParser(req, res, next);
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/admin")) {
+    return next();
+  }
+
+  return urlencodedParser(req, res, next);
+});
+app.use(
+  compression({
+    threshold: 1024,
+  }),
+);
+
+app.use(
+  "/custom",
+  express.static(path.join(__dirname, "admin-assets"), {
+    maxAge: "7d",
+    immutable: true,
+  }),
+);
+app.use(
+  "/public",
+  express.static(path.join(__dirname, "public"), {
+    maxAge: "30d",
+    immutable: true,
+  }),
+);
 
 app.get("/favicon.ico", (_req, res) => {
   return res.redirect(302, "/public/icon.png");
 });
 
 app.get("/", (_req, res) => {
-  return res.redirect(302, "/admin");
+  return res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.get("/health", (_req, res) => {
@@ -386,7 +423,7 @@ app.get("/admin/register", (req, res) => {
         </form>
 
         <div class="footer">
-          Already have an account? <a href="/admin/login">Log in</a>
+          Already have an account? <a href="/admin">Log in</a>
         </div>
       </div>
     </div>
@@ -443,7 +480,7 @@ app.get("/admin/register", (req, res) => {
             form.reset();
 
             setTimeout(() => {
-              window.location.href = "/admin/login";
+              window.location.href = "/admin";
             }, 2000);
           } else {
             throw new Error(data.message || "Registration failed");
@@ -468,6 +505,16 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/order-items", orderItemRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/uploads", uploadRoutes);
+
+// About page route
+app.get("/about", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "about-page.html"));
+});
+
+// Contact page route
+app.get("/contact", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "contact-page.html"));
+});
 
 if (!isServerlessRuntime) {
   sequelize

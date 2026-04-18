@@ -23,3 +23,5 @@ import CategoryShow from '../admin/category-show'
 AdminJS.UserComponents.CategoryShow = CategoryShow
 import About from '../admin/about'
 AdminJS.UserComponents.About = About
+import Contact from '../admin/contact'
+AdminJS.UserComponents.Contact = Contact
