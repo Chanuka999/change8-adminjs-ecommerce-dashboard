@@ -3,7 +3,7 @@
     "username": "neondb_owner",
     "password": "npg_CsAk0Wewp2aV",
     "database": "neondb",
-    "host": "ep-polished-glade-a49lj390-pooler.us-east-1.aws.neon.tech",
+    "host": "ep-polished-glade-a49lj390-pooler.us-east-1.aws.neon.tech?uselibpqcompat=true",
     "dialect": "postgres",
     "dialectOptions": {
       "ssl": {
